@@ -15,16 +15,35 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/huh/wrong/endpoint": {
-            "get": {
-                "description": "This endpoint is intended for testing purpose only",
+        "/anime/detail-alt": {
+            "post": {
+                "description": "This endpoint will scrape the detail instead of fetching from database",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Token"
+                    "Anime"
                 ],
-                "summary": "Generate auth token",
+                "summary": "Anime detail alternative",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/webscraper.TitleSearchResult"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -37,7 +56,111 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/router.demoTokenResponse"
+                                            "$ref": "#/definitions/webscraper.anime"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/anime/search": {
+            "get": {
+                "description": "Will find all anime with matching keywords",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Anime"
+                ],
+                "summary": "Search anime title",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "Naruto",
+                        "description": "Keywords of anime title",
+                        "name": "keywords",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.baseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/webscraper.TitleSearchResult"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/anime/video-url": {
+            "post": {
+                "description": "Fetch video URL by episode endpoint",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Anime"
+                ],
+                "summary": "Video URL",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.videoURLRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.baseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/controller.videoURLResponse"
                                         }
                                     }
                                 }
@@ -79,7 +202,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/router.refreshTokenResponse"
+                                            "$ref": "#/definitions/controller.refreshTokenResponse"
                                         }
                                     }
                                 }
@@ -103,7 +226,7 @@ const docTemplate = `{
                 }
             }
         },
-        "router.demoTokenResponse": {
+        "controller.refreshTokenResponse": {
             "type": "object",
             "properties": {
                 "auth_token": {
@@ -111,10 +234,87 @@ const docTemplate = `{
                 }
             }
         },
-        "router.refreshTokenResponse": {
+        "controller.videoURLRequest": {
+            "type": "object",
+            "required": [
+                "episode_endpoint"
+            ],
+            "properties": {
+                "episode_endpoint": {
+                    "type": "string",
+                    "example": "/naruto-episode-1"
+                }
+            }
+        },
+        "controller.videoURLResponse": {
             "type": "object",
             "properties": {
-                "auth_token": {
+                "video_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "webscraper.TitleSearchResult": {
+            "type": "object",
+            "properties": {
+                "endpoint": {
+                    "type": "string",
+                    "example": "/category/naruto"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "naruto"
+                }
+            }
+        },
+        "webscraper.anime": {
+            "type": "object",
+            "properties": {
+                "airing_year": {
+                    "type": "string"
+                },
+                "episodes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/webscraper.episode"
+                    }
+                },
+                "genre": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "latest_episode": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "webscraper.episode": {
+            "type": "object",
+            "properties": {
+                "endpoint": {
+                    "type": "string"
+                },
+                "text": {
                     "type": "string"
                 }
             }

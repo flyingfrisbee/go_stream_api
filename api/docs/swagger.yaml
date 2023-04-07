@@ -7,22 +7,86 @@ definitions:
       status_code:
         type: integer
     type: object
-  router.demoTokenResponse:
+  controller.refreshTokenResponse:
     properties:
       auth_token:
         type: string
     type: object
-  router.refreshTokenResponse:
+  controller.videoURLRequest:
     properties:
-      auth_token:
+      episode_endpoint:
+        example: /naruto-episode-1
+        type: string
+    required:
+    - episode_endpoint
+    type: object
+  controller.videoURLResponse:
+    properties:
+      video_url:
+        type: string
+    type: object
+  webscraper.TitleSearchResult:
+    properties:
+      endpoint:
+        example: /category/naruto
+        type: string
+      title:
+        example: naruto
+        type: string
+    type: object
+  webscraper.anime:
+    properties:
+      airing_year:
+        type: string
+      episodes:
+        items:
+          $ref: '#/definitions/webscraper.episode'
+        type: array
+      genre:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      latest_episode:
+        type: string
+      status:
+        type: string
+      summary:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  webscraper.episode:
+    properties:
+      endpoint:
+        type: string
+      text:
         type: string
     type: object
 info:
   contact: {}
 paths:
-  /huh/wrong/endpoint:
-    get:
-      description: This endpoint is intended for testing purpose only
+  /anime/detail-alt:
+    post:
+      description: This endpoint will scrape the detail instead of fetching from database
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/webscraper.TitleSearchResult'
+      - default: Bearer <Add access token here>
+        description: Insert your auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -33,11 +97,75 @@ paths:
             - $ref: '#/definitions/common.baseResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/router.demoTokenResponse'
+                  $ref: '#/definitions/webscraper.anime'
               type: object
-      summary: Generate auth token
+      summary: Anime detail alternative
       tags:
-      - Token
+      - Anime
+  /anime/search:
+    get:
+      description: Will find all anime with matching keywords
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - default: Naruto
+        description: Keywords of anime title
+        in: query
+        name: keywords
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.baseResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/webscraper.TitleSearchResult'
+                  type: array
+              type: object
+      summary: Search anime title
+      tags:
+      - Anime
+  /anime/video-url:
+    post:
+      description: Fetch video URL by episode endpoint
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.videoURLRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.baseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/controller.videoURLResponse'
+              type: object
+      summary: Video URL
+      tags:
+      - Anime
   /token/refresh:
     get:
       description: Refresh token will have later expiry date than auth token so user
@@ -59,7 +187,7 @@ paths:
             - $ref: '#/definitions/common.baseResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/router.refreshTokenResponse'
+                  $ref: '#/definitions/controller.refreshTokenResponse'
               type: object
       summary: Generate auth token by providing refresh token
       tags:

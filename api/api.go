@@ -39,4 +39,5 @@ func Run() {
 func registerRouters(rg *gin.RouterGroup) {
 	router.DemoTokenRouter(rg)
 	router.RefreshTokenRouter(rg)
+	router.AnimeRouter(rg)
 }
