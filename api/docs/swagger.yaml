@@ -1,0 +1,67 @@
+definitions:
+  common.baseResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      status_code:
+        type: integer
+    type: object
+  router.demoTokenResponse:
+    properties:
+      auth_token:
+        type: string
+    type: object
+  router.refreshTokenResponse:
+    properties:
+      auth_token:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /huh/wrong/endpoint:
+    get:
+      description: This endpoint is intended for testing purpose only
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.baseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/router.demoTokenResponse'
+              type: object
+      summary: Generate auth token
+      tags:
+      - Token
+  /token/refresh:
+    get:
+      description: Refresh token will have later expiry date than auth token so user
+        can reissue auth token whenever expired
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your refresh token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.baseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/router.refreshTokenResponse'
+              type: object
+      summary: Generate auth token by providing refresh token
+      tags:
+      - Token
+swagger: "2.0"
