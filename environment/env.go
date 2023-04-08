@@ -21,6 +21,7 @@ var (
 	BaseURLForScraping   string
 	EpisodesURLFormat    string
 	TitleSearchURLFormat string
+	FCMURL               string
 
 	// CSS selectors
 	HomeSelector             string
@@ -52,6 +53,9 @@ var (
 
 	// Token
 	GHAuthToken string
+
+	// FCM
+	FCMKey string
 )
 
 func LoadEnvVariables() {
@@ -68,6 +72,7 @@ func LoadEnvVariables() {
 	BaseURLForScraping = os.Getenv("BASE_URL_FOR_SCRAPING")
 	EpisodesURLFormat = os.Getenv("EPISODES_URL_FORMAT")
 	TitleSearchURLFormat = os.Getenv("TITLE_SEARCH_URL_FORMAT")
+	FCMURL = os.Getenv("FCM_URL")
 	HomeSelector = os.Getenv("HOME_SELECTOR")
 	StreamSelector = os.Getenv("STREAM_SELECTOR")
 	EpisodesSelector = os.Getenv("EPISODES_SELECTOR")
@@ -87,4 +92,5 @@ func LoadEnvVariables() {
 	DBMSConnString = os.Getenv("DBMS_CONN_STRING")
 	CurrentVersion = os.Getenv("CURRENT_VERSION")
 	GHAuthToken = os.Getenv("GH_AUTH_TOKEN")
+	FCMKey = os.Getenv("FCM_KEY")
 }

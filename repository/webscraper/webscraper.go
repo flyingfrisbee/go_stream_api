@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	env "go_stream_api/environment"
+	"go_stream_api/notification"
 	db "go_stream_api/repository/database"
 	"go_stream_api/repository/database/domain"
 	"log"
@@ -155,6 +156,11 @@ func processAnime(a *domain.Anime) error {
 			}
 		case domain.NoChangesFound:
 		}
+	}
+
+	err = notification.SendNotificationMessageToUsers(comparisonResult, a)
+	if err != nil {
+		return err
 	}
 
 	return nil

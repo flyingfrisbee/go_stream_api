@@ -3,7 +3,11 @@ package relational
 type userRelatedQuery interface {
 	InsertUser(userToken string) error
 	InsertBookmark(animeID int, userToken, latestEpisode string) error
+	GetUsersTokenByAnimeID(animeID int) ([]string, error)
+	UpdateBookmarkedLatestEpisode(animeID int, latestEp string) error
 	DeleteBookmark(animeID int, userToken string) error
+	DeleteBookmarkByUserToken(userToken string) error
+	DeleteUser(userToken string) error
 }
 
 type userTable struct {
@@ -28,17 +32,8 @@ func (u *userTable) InsertBookmark(animeID int, userToken, latestEpisode string)
 	return nil
 }
 
-func (u *userTable) DeleteBookmark(animeID int, userToken string) error {
-	_, err := u.conn.pool.Exec(u.conn.ctx, deleteBookmarkQuery, userToken, animeID)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (u *userTable) GetUsersTokenByAnimeID(animeID int) ([]string, error) {
-	rows, err := u.conn.pool.Query(u.conn.ctx, getUsersTokenByAnimeID, animeID)
+	rows, err := u.conn.pool.Query(u.conn.ctx, getUsersTokenByAnimeIDQuery, animeID)
 	if err != nil {
 		return nil, err
 	}
@@ -62,8 +57,35 @@ func (u *userTable) UpdateBookmarkedLatestEpisode(
 	newLatestEpisode string,
 ) error {
 	_, err := u.conn.pool.Exec(
-		u.conn.ctx, updateBookmarkedLatestEpisode, newLatestEpisode, animeID,
+		u.conn.ctx, updateBookmarkedLatestEpisodeQuery, newLatestEpisode, animeID,
 	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *userTable) DeleteBookmark(animeID int, userToken string) error {
+	_, err := u.conn.pool.Exec(u.conn.ctx, deleteBookmarkQuery, userToken, animeID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *userTable) DeleteBookmarkByUserToken(userToken string) error {
+	_, err := u.conn.pool.Exec(u.conn.ctx, deleteBookmarkByUserTokenQuery, userToken)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *userTable) DeleteUser(userToken string) error {
+	_, err := u.conn.pool.Exec(u.conn.ctx, deleteUserQuery, userToken)
 	if err != nil {
 		return err
 	}
@@ -83,11 +105,7 @@ var (
 		$2, $3
 	);`
 
-	deleteBookmarkQuery = `
-	DELETE FROM stream_anime.user_anime_xref
-	WHERE user_id = (SELECT id FROM stream_anime.user WHERE user_token = $1) AND anime_id = $2;`
-
-	getUsersTokenByAnimeID = `
+	getUsersTokenByAnimeIDQuery = `
 	SELECT u.user_token FROM stream_anime.user_anime_xref uax 
 	JOIN stream_anime.user u
 		ON uax.user_id = u.id 
@@ -97,8 +115,20 @@ var (
 			WHERE id = $1
 		);`
 
-	updateBookmarkedLatestEpisode = `
+	updateBookmarkedLatestEpisodeQuery = `
 	UPDATE stream_anime.user_anime_xref 
 	SET bookmarked_latest_episode = $1
 	WHERE anime_id = $2;`
+
+	deleteBookmarkQuery = `
+	DELETE FROM stream_anime.user_anime_xref
+	WHERE user_id = (SELECT id FROM stream_anime.user WHERE user_token = $1) AND anime_id = $2;`
+
+	deleteBookmarkByUserTokenQuery = `
+	DELETE FROM stream_anime.user_anime_xref
+	WHERE user_id = (SELECT id FROM stream_anime.user WHERE user_token = $1);`
+
+	deleteUserQuery = `
+	DELETE FROM stream_anime.user
+	WHERE user_token = $1;`
 )
