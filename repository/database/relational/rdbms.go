@@ -10,7 +10,7 @@ import (
 )
 
 type PostgresInstance struct {
-	*postgresConn
+	postgresConn
 	animeRelatedQuery
 }
 
@@ -31,7 +31,7 @@ func (conn *postgresConn) initializeTables() {
 	}
 }
 
-func (conn *postgresConn) ClosePostgresConnection() {
+func (conn *postgresConn) CloseConnection() {
 	conn.pool.Close()
 	conn.pool = nil
 }
@@ -42,7 +42,7 @@ func StartConnection(ctx context.Context) *PostgresInstance {
 		log.Fatal(err)
 	}
 
-	pgConn := &postgresConn{
+	pgConn := postgresConn{
 		ctx:  ctx,
 		pool: pool,
 	}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	env "go_stream_api/environment"
 	db "go_stream_api/repository/database"
+	"go_stream_api/repository/database/domain"
 	"log"
 	"time"
 
@@ -53,17 +54,100 @@ func runScrapeLoop() {
 			reverseEpisodesOrder(&anime)
 			calculateUpdateTime(&anime, baseTime)
 
-			err := db.Conn.UpsertAnime(&anime)
+			err := processAnime(&anime)
 			if err != nil {
 				log.Fatal(err)
 			}
-
-			// err := anime.ProcessAnimeData()
-			// if err != nil {
-			// 	log.Fatal(err)
-			// }
 		}
 	}
+}
+
+func processAnime(a *domain.Anime) error {
+	// Get enum by comparing latest episode
+	latestEpisode, err := db.Conn.Pg.GetLatestEpisode(a.ID)
+	if err != nil {
+		return err
+	}
+
+	comparisonResult := domain.NewEpisodeFound
+	if latestEpisode == nil {
+		comparisonResult = domain.EntryNotFound
+	} else if *latestEpisode == a.LatestEpisode {
+		comparisonResult = domain.NoChangesFound
+	}
+
+	storageType := db.Postgres
+	if len(a.Episodes) > 30 {
+		storageType = db.MongoDB
+	}
+
+	if storageType == db.Postgres {
+		// Postgres
+		switch comparisonResult {
+		case domain.EntryNotFound:
+			err = db.Conn.Pg.UpsertAnime(a)
+			if err != nil {
+				return err
+			}
+			rowsInserted, err := db.Conn.Pg.InsertEpisodesToPostgres(a, 0)
+			if err != nil {
+				return err
+			}
+			if rowsInserted < 1 {
+				return fmt.Errorf("failed inserting episodes of anime %s", a.Title)
+			}
+		case domain.NewEpisodeFound:
+			err = db.Conn.Pg.UpsertAnime(a)
+			if err != nil {
+				return err
+			}
+			epsCount, err := db.Conn.Pg.GetEpisodesCount(a)
+			if err != nil {
+				return err
+			}
+			newEpsCount := len(a.Episodes) - epsCount
+			rowsInserted, err := db.Conn.Pg.InsertEpisodesToPostgres(a, newEpsCount)
+			if err != nil {
+				return err
+			}
+			if rowsInserted < 1 {
+				return fmt.Errorf("failed inserting episodes of anime %s", a.Title)
+			}
+		case domain.NoChangesFound:
+		}
+	} else {
+		// MongoDB
+		switch comparisonResult {
+		case domain.EntryNotFound:
+			err = db.Conn.Pg.UpsertAnime(a)
+			if err != nil {
+				return err
+			}
+			episodes := a.GetEpisodesAsSliceInterface()
+			err = db.Conn.Mongo.InsertEpisodes(a, episodes, 0)
+			if err != nil {
+				return err
+			}
+		case domain.NewEpisodeFound:
+			err = db.Conn.Pg.UpsertAnime(a)
+			if err != nil {
+				return err
+			}
+			episodes := a.GetEpisodesAsSliceInterface()
+			epsCount, err := db.Conn.Mongo.GetEpisodesCount(a.ID)
+			if err != nil {
+				return err
+			}
+			newEpsCount := len(episodes) - epsCount
+			err = db.Conn.Mongo.InsertEpisodes(a, episodes, newEpsCount)
+			if err != nil {
+				return err
+			}
+		case domain.NoChangesFound:
+		}
+	}
+
+	return nil
 }
 
 func errorCallback(r *colly.Response, err error) {

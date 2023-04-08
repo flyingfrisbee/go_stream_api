@@ -2,19 +2,22 @@ package database
 
 import (
 	"context"
+	nonrelational "go_stream_api/repository/database/non_relational"
 	"go_stream_api/repository/database/relational"
+	"log"
 )
 
-type persistentStorageType int
+type PersistentStorageType int
 
 const (
-	Postgres persistentStorageType = iota
+	Postgres PersistentStorageType = iota
 	MongoDB
 )
 
 type dbConn struct {
 	cancel context.CancelFunc
-	*relational.PostgresInstance
+	Pg     *relational.PostgresInstance
+	Mongo  *nonrelational.MongoDBInstance
 }
 
 var (
@@ -24,12 +27,17 @@ var (
 func StartConnectionToDB() {
 	ctx, cancel := context.WithCancel(context.Background())
 	Conn = dbConn{
-		cancel:           cancel,
-		PostgresInstance: relational.StartConnection(ctx),
+		cancel: cancel,
+		Pg:     relational.StartConnection(ctx),
+		Mongo:  nonrelational.StartConnection(ctx),
 	}
 }
 
 func TerminateConnectionToDB() {
-	Conn.ClosePostgresConnection()
+	Conn.Pg.CloseConnection()
+	err := Conn.Mongo.CloseConnection()
+	if err != nil {
+		log.Fatal(err)
+	}
 	Conn.cancel()
 }
