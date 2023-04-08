@@ -5,11 +5,13 @@ import (
 	env "go_stream_api/environment"
 	db "go_stream_api/repository/database"
 	"go_stream_api/repository/webscraper"
+	"go_stream_api/webhook"
 )
 
 func main() {
 	env.LoadEnvVariables()
 	db.StartConnectionToDB()
-	go webscraper.StartScrapingService()
+	webhook.StartWebhookService()
 	api.Run()
+	go webscraper.StartScrapingService()
 }

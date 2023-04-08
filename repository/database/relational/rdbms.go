@@ -12,6 +12,7 @@ import (
 type PostgresInstance struct {
 	postgresConn
 	animeRelatedQuery
+	userRelatedQuery
 }
 
 type postgresConn struct {
@@ -48,10 +49,9 @@ func StartConnection(ctx context.Context) *PostgresInstance {
 	}
 
 	instance := &PostgresInstance{
-		postgresConn: pgConn,
-		animeRelatedQuery: &animeTable{
-			conn: pgConn,
-		},
+		postgresConn:      pgConn,
+		animeRelatedQuery: &animeTable{conn: pgConn},
+		userRelatedQuery:  &userTable{conn: pgConn},
 	}
 
 	instance.initializeTables()

@@ -14,7 +14,8 @@ var (
 	RefreshTokenValidityDays string
 
 	// Router & path related
-	RouterSecretPath string
+	RouterSecretPath  string
+	RouterSecretPath2 string
 
 	// URLs
 	BaseURLForScraping   string
@@ -45,6 +46,12 @@ var (
 	// DB connection string
 	RDBMSConnString string
 	DBMSConnString  string
+
+	// Versioning
+	CurrentVersion string
+
+	// Token
+	GHAuthToken string
 )
 
 func LoadEnvVariables() {
@@ -57,6 +64,7 @@ func LoadEnvVariables() {
 	AuthTokenValidityDays = os.Getenv("AUTH_TOKEN_VALIDITY_DAYS")
 	RefreshTokenValidityDays = os.Getenv("REFRESH_TOKEN_VALIDITY_DAYS")
 	RouterSecretPath = os.Getenv("ROUTER_SECRET_PATH")
+	RouterSecretPath2 = os.Getenv("ROUTER_SECRET_PATH2")
 	BaseURLForScraping = os.Getenv("BASE_URL_FOR_SCRAPING")
 	EpisodesURLFormat = os.Getenv("EPISODES_URL_FORMAT")
 	TitleSearchURLFormat = os.Getenv("TITLE_SEARCH_URL_FORMAT")
@@ -77,4 +85,6 @@ func LoadEnvVariables() {
 	Keyword5 = os.Getenv("KEYWORD5")
 	RDBMSConnString = os.Getenv("RDBMS_CONN_STRING")
 	DBMSConnString = os.Getenv("DBMS_CONN_STRING")
+	CurrentVersion = os.Getenv("CURRENT_VERSION")
+	GHAuthToken = os.Getenv("GH_AUTH_TOKEN")
 }
