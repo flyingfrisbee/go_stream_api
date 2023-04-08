@@ -2,6 +2,7 @@ package controller
 
 import (
 	"go_stream_api/api/common"
+	"go_stream_api/api/token"
 	db "go_stream_api/repository/database"
 	"net/http"
 
@@ -10,6 +11,11 @@ import (
 
 type registerUserRequest struct {
 	UserToken string `json:"user_token" binding:"required"`
+}
+
+type registerUserResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 func RegisterUserHandler(c *gin.Context) {
@@ -26,5 +32,20 @@ func RegisterUserHandler(c *gin.Context) {
 		return
 	}
 
-	common.WrapWithBaseResponse(c, nil, "Success register user", http.StatusOK)
+	authToken, err := token.GenerateJWT(token.Authorization)
+	if err != nil {
+		common.WrapWithBaseResponse(c, nil, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	refreshToken, err := token.GenerateJWT(token.Refresh)
+	if err != nil {
+		common.WrapWithBaseResponse(c, nil, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := registerUserResponse{
+		AccessToken:  authToken,
+		RefreshToken: refreshToken,
+	}
+	common.WrapWithBaseResponse(c, response, "Success register user", http.StatusOK)
 }

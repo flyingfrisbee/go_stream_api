@@ -3,7 +3,10 @@ package webhook
 import (
 	"encoding/json"
 	"fmt"
+	"go_stream_api/api"
 	env "go_stream_api/environment"
+	db "go_stream_api/repository/database"
+	ws "go_stream_api/repository/webscraper"
 	"io"
 	"log"
 	"net/http"
@@ -71,8 +74,10 @@ func webhookTask() {
 		successRerun = rerunWorkflowByID(workflowID)
 	}
 
-	// cancel context webscraper + notif + database connection
 	sched.Clear()
+	api.Stop()
+	ws.Stop()
+	db.TerminateConnectionToDB()
 }
 
 func getID(version currentVersion) int {

@@ -1,15 +1,21 @@
 package api
 
 import (
+	"context"
 	"go_stream_api/api/docs"
 	"go_stream_api/api/router"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
 
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+)
+
+var (
+	srv *http.Server
 )
 
 // Run 'swag init -o ./api/docs' everytime changes that affect swagger occurs
@@ -29,11 +35,19 @@ func Run() {
 		port = ":8080"
 	}
 
-	err := r.Run(port)
+	srv = &http.Server{
+		Addr:    port,
+		Handler: r,
+	}
+
+	go runServer(srv)
+}
+
+func Stop() {
+	err := srv.Shutdown(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 func registerRouters(rg *gin.RouterGroup) {
@@ -41,4 +55,11 @@ func registerRouters(rg *gin.RouterGroup) {
 	router.RefreshTokenRouter(rg)
 	router.AnimeRouter(rg)
 	router.UserRouter(rg)
+}
+
+func runServer(srv *http.Server) {
+	defer log.Println("Stopping API...")
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("listen: %s\n", err)
+	}
 }

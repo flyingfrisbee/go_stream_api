@@ -7,6 +7,7 @@ import (
 	db "go_stream_api/repository/database"
 	"go_stream_api/repository/database/domain"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/gocolly/colly"
@@ -15,20 +16,29 @@ import (
 var (
 	ctx    context.Context
 	cancel context.CancelFunc
+	wg     sync.WaitGroup
 )
 
 func StartScrapingService() {
+	wg.Add(1)
 	ctx, cancel = context.WithCancel(context.Background())
 
 	for {
 		select {
 		case <-ctx.Done():
 			log.Println("Stopping scraping service...")
+			wg.Done()
 			return
 		default:
 			runScrapeLoop()
 		}
 	}
+}
+
+// Will block until webscraper finish on going scraping process
+func Stop() {
+	cancel()
+	wg.Wait()
 }
 
 // Scrape data and save to database
