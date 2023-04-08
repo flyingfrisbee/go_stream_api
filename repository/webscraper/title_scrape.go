@@ -8,8 +8,8 @@ import (
 )
 
 type TitleSearchResult struct {
-	Title    string `json:"title" example:"naruto"`
-	Endpoint string `json:"endpoint" example:"/category/naruto"`
+	Title    string `json:"title" binding:"required" example:"naruto"`
+	Endpoint string `json:"endpoint" binding:"required" example:"/category/naruto"`
 }
 
 func ScrapeAnimeTitlesByKeyword(keyword string) []TitleSearchResult {

@@ -3,38 +3,16 @@ package webscraper
 import (
 	"fmt"
 	env "go_stream_api/environment"
+	"go_stream_api/repository/database/domain"
 	"log"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gocolly/colly"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type episode struct {
-	ID       primitive.ObjectID `json:"-" bson:"_id,omitempty"`
-	Text     string             `json:"text" bson:"text,omitempty"`
-	Endpoint string             `json:"endpoint" bson:"endpoint,omitempty"`
-}
-
-type anime struct {
-	ID             int       `json:"id"`
-	Title          string    `json:"title"`
-	Type           string    `json:"type"`
-	Summary        string    `json:"summary"`
-	Genre          string    `json:"genre"`
-	AiringYear     string    `json:"airing_year"`
-	Status         string    `json:"status"`
-	ImageURL       string    `json:"image_url"`
-	LatestEpisode  string    `json:"latest_episode"`
-	Episodes       []episode `json:"episodes"`
-	UpdatedAt      time.Time `json:"updated_at"`
-	StreamEndpoint string    `json:"-"`
-	DetailEndpoint string    `json:"-"`
-}
-
-func (a *anime) scrapeDetail(url string) {
+func scrapeDetail(a *domain.Anime, url string) {
 	c := colly.NewCollector()
 
 	c.OnHTML(env.DetailSelector, func(e *colly.HTMLElement) {
@@ -88,13 +66,13 @@ func (a *anime) scrapeDetail(url string) {
 	}
 }
 
-func (a *anime) scrapeEpisodes(url string) {
+func scrapeEpisodes(a *domain.Anime, url string) {
 	c := colly.NewCollector()
 
 	c.OnHTML(env.EpisodesSelector, func(e *colly.HTMLElement) {
 		episodeText := strings.Replace(e.ChildText("div:first-child"), "EP ", "", 1)
 		endpoint := strings.TrimSpace(e.Attr("href"))
-		episode := episode{
+		episode := domain.Episode{
 			Text:     episodeText,
 			Endpoint: endpoint,
 		}
@@ -107,7 +85,7 @@ func (a *anime) scrapeEpisodes(url string) {
 	c.Visit(url)
 }
 
-func (a *anime) scrapeStream(url string) {
+func scrapeStream(a *domain.Anime, url string) {
 	c := colly.NewCollector()
 
 	c.OnHTML(env.StreamSelector, func(e *colly.HTMLElement) {
@@ -133,8 +111,8 @@ func (a *anime) scrapeStream(url string) {
 	c.Visit(url)
 }
 
-func (a *anime) reverseEpisodesOrder() {
-	result := []episode{}
+func reverseEpisodesOrder(a *domain.Anime) {
+	result := []domain.Episode{}
 
 	length := len(a.Episodes)
 	for i := (length - 1); i >= 0; i-- {
@@ -144,7 +122,7 @@ func (a *anime) reverseEpisodesOrder() {
 	a.Episodes = result
 }
 
-func (a *anime) calculateUpdateTime(baseTime time.Time) {
+func calculateUpdateTime(a *domain.Anime, baseTime time.Time) {
 	currentTime := time.Now().UTC()
 	timeDiff := currentTime.Sub(baseTime)
 
@@ -153,17 +131,17 @@ func (a *anime) calculateUpdateTime(baseTime time.Time) {
 }
 
 // If user click title from search bar result, use this scrape func
-func ScrapeDetailAlternative(searchResult TitleSearchResult) anime {
-	anime := anime{Title: searchResult.Title}
+func ScrapeDetailAlternative(searchResult TitleSearchResult) domain.Anime {
+	anime := domain.Anime{Title: searchResult.Title}
 	url := env.BaseURLForScraping + searchResult.Endpoint
-	anime.scrapeDetail(url)
+	scrapeDetail(&anime, url)
 
 	url = fmt.Sprintf(env.EpisodesURLFormat, anime.ID)
-	anime.scrapeEpisodes(url)
+	scrapeEpisodes(&anime, url)
 
 	// Necessary because the order from scraping is descending.
 	// Ascending is preferable hence the function call
-	anime.reverseEpisodesOrder()
+	reverseEpisodesOrder(&anime)
 
 	return anime
 }

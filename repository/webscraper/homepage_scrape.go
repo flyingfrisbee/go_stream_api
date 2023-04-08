@@ -2,13 +2,14 @@ package webscraper
 
 import (
 	env "go_stream_api/environment"
+	"go_stream_api/repository/database/domain"
 	"strings"
 
 	"github.com/gocolly/colly"
 )
 
-func scrapeHome(url string) []anime {
-	animes := []anime{}
+func scrapeHome(url string) []domain.Anime {
+	animes := []domain.Anime{}
 
 	c := colly.NewCollector()
 
@@ -18,7 +19,7 @@ func scrapeHome(url string) []anime {
 		latestEpisode := strings.Replace(e.ChildText(".episode"), "Episode ", "", 1)
 		streamEndpoint := e.ChildAttr(".name > a", "href")
 
-		anime := anime{
+		anime := domain.Anime{
 			Title:          title,
 			ImageURL:       imgURL,
 			LatestEpisode:  latestEpisode,

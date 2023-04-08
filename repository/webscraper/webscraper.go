@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	env "go_stream_api/environment"
+	db "go_stream_api/repository/database"
 	"log"
 	"time"
 
@@ -39,18 +40,23 @@ func runScrapeLoop() {
 
 		for _, anime := range animes {
 			url = env.BaseURLForScraping + anime.StreamEndpoint
-			anime.scrapeStream(url)
+			scrapeStream(&anime, url)
 
 			url = fmt.Sprintf(env.EpisodesURLFormat, anime.ID)
-			anime.scrapeEpisodes(url)
+			scrapeEpisodes(&anime, url)
 
 			url = env.BaseURLForScraping + anime.DetailEndpoint
-			anime.scrapeDetail(url)
+			scrapeDetail(&anime, url)
 
 			// Necessary because the order from scraping is descending.
 			// Ascending is preferable hence the function call
-			anime.reverseEpisodesOrder()
-			anime.calculateUpdateTime(baseTime)
+			reverseEpisodesOrder(&anime)
+			calculateUpdateTime(&anime, baseTime)
+
+			err := db.Conn.UpsertAnime(&anime)
+			if err != nil {
+				log.Fatal(err)
+			}
 
 			// err := anime.ProcessAnimeData()
 			// if err != nil {
