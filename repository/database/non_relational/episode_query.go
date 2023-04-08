@@ -12,7 +12,7 @@ import (
 type episodeRelatedQuery interface {
 	// Insert last n episodes to mongoDB. If n < 1 then all episodes will be inserted
 	InsertEpisodes(a *domain.Anime, eps []interface{}, n int) error
-	GetEpisodes(*domain.Anime) ([]domain.Episode, error)
+	GetEpisodes(animeID int) ([]domain.Episode, error)
 	GetEpisodesCount(animeID int) (int, error)
 }
 
@@ -46,8 +46,8 @@ func (ec *episodeCollections) InsertEpisodes(a *domain.Anime, eps []interface{},
 	return nil
 }
 
-func (ec *episodeCollections) GetEpisodes(a *domain.Anime) ([]domain.Episode, error) {
-	id := strconv.Itoa(a.ID)
+func (ec *episodeCollections) GetEpisodes(animeID int) ([]domain.Episode, error) {
+	id := strconv.Itoa(animeID)
 	collection := ec.conn.client.Database("not_episodes").Collection(id)
 
 	// Sort episodes ascending
@@ -67,7 +67,7 @@ func (ec *episodeCollections) GetEpisodes(a *domain.Anime) ([]domain.Episode, er
 
 	episodesAreEmpty := len(episodes) == 0
 	if episodesAreEmpty {
-		return nil, fmt.Errorf("failed getting episodes from MongoDB for anime: %s", a.Title)
+		return nil, fmt.Errorf("failed getting episodes from MongoDB for animeID: %d", animeID)
 	}
 
 	return episodes, nil

@@ -10,6 +10,6 @@ import (
 func main() {
 	env.LoadEnvVariables()
 	db.StartConnectionToDB()
-	api.Run()
 	go webscraper.StartScrapingService()
+	api.Run()
 }

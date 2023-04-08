@@ -14,6 +14,8 @@ type animeRelatedQuery interface {
 	GetRecentAnimes(page int) ([]domain.RecentAnime, error)
 	GetLatestEpisode(animeID int) (*string, error)
 	GetEpisodesCount(anime *domain.Anime) (int, error)
+	GetEpisodes(animeID int) ([]domain.Episode, error)
+	GetAnimeDetail(animeID int) (domain.Anime, error)
 }
 
 type animeTable struct {
@@ -112,6 +114,44 @@ func (a *animeTable) GetEpisodesCount(anime *domain.Anime) (int, error) {
 	return epsCount, nil
 }
 
+func (a *animeTable) GetEpisodes(animeID int) ([]domain.Episode, error) {
+	rows, err := a.conn.pool.Query(a.conn.ctx, episodesQuery, animeID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	eps := []domain.Episode{}
+	for rows.Next() {
+		var ep domain.Episode
+		err = rows.Scan(&ep.Text, &ep.Endpoint)
+		if err != nil {
+			return nil, err
+		}
+		eps = append(eps, ep)
+	}
+
+	return eps, nil
+}
+
+func (a *animeTable) GetAnimeDetail(animeID int) (domain.Anime, error) {
+	var anime domain.Anime
+	row := a.conn.pool.QueryRow(a.conn.ctx, animeDetailQuery, animeID)
+	err := row.Scan(
+		&anime.ID, &anime.Title, &anime.Type, &anime.Summary,
+		&anime.Genre, &anime.AiringYear, &anime.Status,
+		&anime.ImageURL, &anime.LatestEpisode, &anime.UpdatedAt,
+	)
+	if err != nil {
+		return anime, err
+	}
+
+	return anime, nil
+}
+
 var (
 	upsertAnimeQuery = `
 	INSERT INTO stream_anime.anime (
@@ -148,4 +188,12 @@ var (
 	JOIN stream_anime.episode e
 		ON a.id = e.anime_id
 	WHERE a.id = $1;`
+
+	episodesQuery = `
+	SELECT text, endpoint from stream_anime.episode
+	WHERE anime_id = $1;`
+
+	animeDetailQuery = `
+	SELECT * FROM stream_anime.anime
+	WHERE id = $1;`
 )

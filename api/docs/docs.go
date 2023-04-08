@@ -56,7 +56,105 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/webscraper.anime"
+                                            "$ref": "#/definitions/domain.Anime"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/anime/detail/{anime_id}": {
+            "get": {
+                "description": "By providing anime id, this endpoint will return the details",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Anime"
+                ],
+                "summary": "Get anime detail",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Anime ID",
+                        "name": "anime_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.baseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/domain.Anime"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/anime/recent": {
+            "get": {
+                "description": "This endpoint supports pagination",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Anime"
+                ],
+                "summary": "Get recently updated / released anime",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Desired page",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.baseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/domain.RecentAnime"
                                         }
                                     }
                                 }
@@ -254,20 +352,7 @@ const docTemplate = `{
                 }
             }
         },
-        "webscraper.TitleSearchResult": {
-            "type": "object",
-            "properties": {
-                "endpoint": {
-                    "type": "string",
-                    "example": "/category/naruto"
-                },
-                "title": {
-                    "type": "string",
-                    "example": "naruto"
-                }
-            }
-        },
-        "webscraper.anime": {
+        "domain.Anime": {
             "type": "object",
             "properties": {
                 "airing_year": {
@@ -276,7 +361,7 @@ const docTemplate = `{
                 "episodes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/webscraper.episode"
+                        "$ref": "#/definitions/domain.Episode"
                     }
                 },
                 "genre": {
@@ -308,7 +393,7 @@ const docTemplate = `{
                 }
             }
         },
-        "webscraper.episode": {
+        "domain.Episode": {
             "type": "object",
             "properties": {
                 "endpoint": {
@@ -316,6 +401,43 @@ const docTemplate = `{
                 },
                 "text": {
                     "type": "string"
+                }
+            }
+        },
+        "domain.RecentAnime": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "latest_episode": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "webscraper.TitleSearchResult": {
+            "type": "object",
+            "required": [
+                "endpoint",
+                "title"
+            ],
+            "properties": {
+                "endpoint": {
+                    "type": "string",
+                    "example": "/category/naruto"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "naruto"
                 }
             }
         }

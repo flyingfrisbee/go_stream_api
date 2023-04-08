@@ -13,7 +13,7 @@ import (
 // @Description This endpoint will scrape the detail instead of fetching from database
 // @Tags Anime
 // @Produce json
-// @Success 200 {object} common.baseResponse{data=webscraper.anime}
+// @Success 200 {object} common.baseResponse{data=domain.Anime}
 // @Router /anime/detail-alt [post]
 // @Param request body webscraper.TitleSearchResult true "request body"
 // @Param Authorization header string true "Insert your auth token" default(Bearer <Add access token here>)

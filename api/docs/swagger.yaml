@@ -25,22 +25,13 @@ definitions:
       video_url:
         type: string
     type: object
-  webscraper.TitleSearchResult:
-    properties:
-      endpoint:
-        example: /category/naruto
-        type: string
-      title:
-        example: naruto
-        type: string
-    type: object
-  webscraper.anime:
+  domain.Anime:
     properties:
       airing_year:
         type: string
       episodes:
         items:
-          $ref: '#/definitions/webscraper.episode'
+          $ref: '#/definitions/domain.Episode'
         type: array
       genre:
         type: string
@@ -61,12 +52,37 @@ definitions:
       updated_at:
         type: string
     type: object
-  webscraper.episode:
+  domain.Episode:
     properties:
       endpoint:
         type: string
       text:
         type: string
+    type: object
+  domain.RecentAnime:
+    properties:
+      id:
+        type: integer
+      image_url:
+        type: string
+      latest_episode:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  webscraper.TitleSearchResult:
+    properties:
+      endpoint:
+        example: /category/naruto
+        type: string
+      title:
+        example: naruto
+        type: string
+    required:
+    - endpoint
+    - title
     type: object
 info:
   contact: {}
@@ -97,9 +113,69 @@ paths:
             - $ref: '#/definitions/common.baseResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/webscraper.anime'
+                  $ref: '#/definitions/domain.Anime'
               type: object
       summary: Anime detail alternative
+      tags:
+      - Anime
+  /anime/detail/{anime_id}:
+    get:
+      description: By providing anime id, this endpoint will return the details
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Anime ID
+        in: path
+        name: anime_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.baseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Anime'
+              type: object
+      summary: Get anime detail
+      tags:
+      - Anime
+  /anime/recent:
+    get:
+      description: This endpoint supports pagination
+      parameters:
+      - default: Bearer <Add access token here>
+        description: Insert your auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - default: 1
+        description: Desired page
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.baseResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.RecentAnime'
+              type: object
+      summary: Get recently updated / released anime
       tags:
       - Anime
   /anime/search:
