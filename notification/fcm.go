@@ -45,6 +45,10 @@ func SendNotificationMessageToUsers(
 		return err
 	}
 
+	if len(usersToken) < 1 {
+		return nil
+	}
+
 	for _, userToken := range usersToken {
 		wg.Add(1)
 		go handleNotificationTask(&wg, anime, userToken)

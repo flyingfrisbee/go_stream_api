@@ -206,6 +206,60 @@
                 }
             }
         },
+        "/anime/sync": {
+            "post": {
+                "description": "To sync anime data from client to server",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Anime"
+                ],
+                "summary": "Sync anime",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.syncAnimeRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/common.baseResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/domain.SyncAnime"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/anime/video-url": {
             "post": {
                 "description": "Fetch video URL by episode endpoint",
@@ -252,6 +306,82 @@
                                     }
                                 }
                             ]
+                        }
+                    }
+                }
+            }
+        },
+        "/bookmark": {
+            "post": {
+                "description": "User can receive notification from apps when their bookmarked anime has new update",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bookmark"
+                ],
+                "summary": "Save bookmark",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.saveBookmarkRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.baseResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "User can delete bookmark to opt out from notification in the future",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Bookmark"
+                ],
+                "summary": "Delete bookmark",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.deleteBookmarkRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cAdd access token here\u003e",
+                        "description": "Insert your auth token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.baseResponse"
                         }
                     }
                 }
@@ -313,11 +443,59 @@
                 }
             }
         },
+        "controller.deleteBookmarkRequest": {
+            "type": "object",
+            "required": [
+                "anime_id",
+                "user_token"
+            ],
+            "properties": {
+                "anime_id": {
+                    "type": "integer"
+                },
+                "user_token": {
+                    "type": "string"
+                }
+            }
+        },
         "controller.refreshTokenResponse": {
             "type": "object",
             "properties": {
                 "auth_token": {
                     "type": "string"
+                }
+            }
+        },
+        "controller.saveBookmarkRequest": {
+            "type": "object",
+            "required": [
+                "anime_id",
+                "latest_episode",
+                "user_token"
+            ],
+            "properties": {
+                "anime_id": {
+                    "type": "integer"
+                },
+                "latest_episode": {
+                    "type": "string"
+                },
+                "user_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.syncAnimeRequest": {
+            "type": "object",
+            "required": [
+                "anime_ids"
+            ],
+            "properties": {
+                "anime_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -406,6 +584,20 @@
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.SyncAnime": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "latest_episode": {
                     "type": "string"
                 },
                 "updated_at": {

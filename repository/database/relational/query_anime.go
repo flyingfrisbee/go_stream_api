@@ -3,6 +3,7 @@ package relational
 import (
 	"fmt"
 	"go_stream_api/repository/database/domain"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -16,6 +17,7 @@ type animeRelatedQuery interface {
 	GetEpisodesCount(anime *domain.Anime) (int, error)
 	GetEpisodes(animeID int) ([]domain.Episode, error)
 	GetAnimeDetail(animeID int) (domain.Anime, error)
+	GetSyncAnime(animeIDs []int) ([]domain.SyncAnime, error)
 }
 
 type animeTable struct {
@@ -152,6 +154,46 @@ func (a *animeTable) GetAnimeDetail(animeID int) (domain.Anime, error) {
 	return anime, nil
 }
 
+func (a *animeTable) GetSyncAnime(animeIDs []int) ([]domain.SyncAnime, error) {
+	length := len(animeIDs)
+	if length < 1 {
+		return nil, fmt.Errorf("anime ids length cannot be less than 1")
+	}
+
+	ids := make([]interface{}, length)
+	var sb strings.Builder
+	for i := 1; i <= length; i++ {
+		// Can only use spread operator in Query func if type is []any
+		idx := i - 1
+		ids[idx] = animeIDs[idx]
+
+		// Write to strings.Builder
+		if i == length {
+			sb.WriteString(fmt.Sprintf("$%d", i))
+			continue
+		}
+		sb.WriteString(fmt.Sprintf("$%d,", i))
+	}
+
+	finalQuery := fmt.Sprintf(syncAnimeQuery, sb.String())
+	rows, err := a.conn.pool.Query(a.conn.ctx, finalQuery, ids...)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []domain.SyncAnime{}
+	for rows.Next() {
+		var sa domain.SyncAnime
+		err = rows.Scan(&sa.ID, &sa.LatestEpisode, &sa.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, sa)
+	}
+
+	return result, nil
+}
+
 var (
 	upsertAnimeQuery = `
 	INSERT INTO stream_anime.anime (
@@ -196,4 +238,9 @@ var (
 	animeDetailQuery = `
 	SELECT * FROM stream_anime.anime
 	WHERE id = $1;`
+
+	syncAnimeQuery = `
+	SELECT id, latest_episode, updated_at FROM stream_anime.anime
+	WHERE id IN (%s)
+	ORDER BY updated_at DESC;`
 )

@@ -15,4 +15,5 @@ func AnimeRouter(rg *gin.RouterGroup) {
 	group.GET("/search", controller.SearchTitleHandler)
 	group.POST("/video-url", controller.VideoURLHandler)
 	group.POST("/detail-alt", controller.AnimeDetailAlternativeHandler)
+	group.POST("/sync", controller.SyncAnimeHandler)
 }

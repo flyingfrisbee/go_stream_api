@@ -1,11 +1,14 @@
 package relational
 
+import "fmt"
+
 type userRelatedQuery interface {
 	InsertUser(userToken string) error
 	InsertBookmark(animeID int, userToken, latestEpisode string) error
 	GetUsersTokenByAnimeID(animeID int) ([]string, error)
 	UpdateBookmarkedLatestEpisode(animeID int, latestEp string) error
 	DeleteBookmark(animeID int, userToken string) error
+	// For wiping inactive user data
 	DeleteBookmarkByUserToken(userToken string) error
 	DeleteUser(userToken string) error
 }
@@ -67,9 +70,13 @@ func (u *userTable) UpdateBookmarkedLatestEpisode(
 }
 
 func (u *userTable) DeleteBookmark(animeID int, userToken string) error {
-	_, err := u.conn.pool.Exec(u.conn.ctx, deleteBookmarkQuery, userToken, animeID)
+	tag, err := u.conn.pool.Exec(u.conn.ctx, deleteBookmarkQuery, userToken, animeID)
 	if err != nil {
 		return err
+	}
+
+	if tag.RowsAffected() < 1 {
+		return fmt.Errorf("no row exist for animeID: %d and userToken: %s", animeID, userToken)
 	}
 
 	return nil

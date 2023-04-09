@@ -21,7 +21,7 @@ func AnimeDetailAlternativeHandler(c *gin.Context) {
 	var request ws.TitleSearchResult
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
-		common.WrapWithBaseResponse(c, nil, "Cannot parse request body", http.StatusBadRequest)
+		common.WrapWithBaseResponse(c, nil, err.Error(), http.StatusBadRequest)
 		return
 	}
 

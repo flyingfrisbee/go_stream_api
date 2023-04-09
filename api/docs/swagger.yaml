@@ -7,10 +7,42 @@ definitions:
       status_code:
         type: integer
     type: object
+  controller.deleteBookmarkRequest:
+    properties:
+      anime_id:
+        type: integer
+      user_token:
+        type: string
+    required:
+    - anime_id
+    - user_token
+    type: object
   controller.refreshTokenResponse:
     properties:
       auth_token:
         type: string
+    type: object
+  controller.saveBookmarkRequest:
+    properties:
+      anime_id:
+        type: integer
+      latest_episode:
+        type: string
+      user_token:
+        type: string
+    required:
+    - anime_id
+    - latest_episode
+    - user_token
+    type: object
+  controller.syncAnimeRequest:
+    properties:
+      anime_ids:
+        items:
+          type: integer
+        type: array
+    required:
+    - anime_ids
     type: object
   controller.videoURLRequest:
     properties:
@@ -68,6 +100,15 @@ definitions:
       latest_episode:
         type: string
       title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.SyncAnime:
+    properties:
+      id:
+        type: integer
+      latest_episode:
         type: string
       updated_at:
         type: string
@@ -211,6 +252,39 @@ paths:
       summary: Search anime title
       tags:
       - Anime
+  /anime/sync:
+    post:
+      description: To sync anime data from client to server
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.syncAnimeRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/common.baseResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.SyncAnime'
+                  type: array
+              type: object
+      summary: Sync anime
+      tags:
+      - Anime
   /anime/video-url:
     post:
       description: Fetch video URL by episode endpoint
@@ -242,6 +316,58 @@ paths:
       summary: Video URL
       tags:
       - Anime
+  /bookmark:
+    delete:
+      description: User can delete bookmark to opt out from notification in the future
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.deleteBookmarkRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.baseResponse'
+      summary: Delete bookmark
+      tags:
+      - Bookmark
+    post:
+      description: User can receive notification from apps when their bookmarked anime
+        has new update
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.saveBookmarkRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.baseResponse'
+      summary: Save bookmark
+      tags:
+      - Bookmark
   /token/refresh:
     get:
       description: Refresh token will have later expiry date than auth token so user

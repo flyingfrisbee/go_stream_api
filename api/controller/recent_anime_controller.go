@@ -26,7 +26,8 @@ func RecentAnimeHandler(c *gin.Context) {
 	}
 	recentAnimes, err := db.Conn.Pg.GetRecentAnimes(page)
 	if err != nil {
-		common.WrapWithBaseResponse(c, nil, "Error occured when fetching recent anime page %d", page)
+		msg := fmt.Sprintf("Error occured when fetching recent anime page %d", page)
+		common.WrapWithBaseResponse(c, nil, msg, http.StatusInternalServerError)
 		return
 	}
 

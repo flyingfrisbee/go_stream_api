@@ -15,7 +15,7 @@ type demoTokenResponse struct {
 func DemoTokenHandler(c *gin.Context) {
 	authToken, err := token.GenerateJWT(token.Authorization)
 	if err != nil {
-		common.WrapWithBaseResponse(c, nil, "Error while trying to generate authorization token", http.StatusInternalServerError)
+		common.WrapWithBaseResponse(c, nil, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
