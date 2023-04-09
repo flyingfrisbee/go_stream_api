@@ -21,7 +21,13 @@ type postgresConn struct {
 }
 
 func (conn *postgresConn) initializeTables() {
-	sqlBytes, err := os.ReadFile("./repository/database/relational/init.sql")
+	// Check if dev or prod
+	path := env.InitSQLPath
+	if path == "" {
+		path = "./repository/database/relational/init.sql"
+	}
+
+	sqlBytes, err := os.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
 	}

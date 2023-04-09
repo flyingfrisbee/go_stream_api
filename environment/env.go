@@ -56,12 +56,18 @@ var (
 
 	// FCM
 	FCMKey string
+
+	// Static file path
+	InitSQLPath string
 )
 
 func LoadEnvVariables() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal(err)
+		err = godotenv.Load("/app/.env")
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	APISecretKey = os.Getenv("API_SECRET_KEY")
@@ -93,4 +99,5 @@ func LoadEnvVariables() {
 	CurrentVersion = os.Getenv("CURRENT_VERSION")
 	GHAuthToken = os.Getenv("GH_AUTH_TOKEN")
 	FCMKey = os.Getenv("FCM_KEY")
+	InitSQLPath = os.Getenv("INIT_SQL_PATH")
 }
