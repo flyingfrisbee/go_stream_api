@@ -131,9 +131,9 @@ func calculateUpdateTime(a *domain.Anime, baseTime time.Time) {
 }
 
 // If user click title from search bar result, use this scrape func
-func ScrapeDetailAlternative(searchResult TitleSearchResult) domain.Anime {
-	anime := domain.Anime{Title: searchResult.Title}
-	url := env.BaseURLForScraping + searchResult.Endpoint
+func ScrapeDetailAlternative(title, endpoint string) domain.Anime {
+	anime := domain.Anime{Title: title}
+	url := env.BaseURLForScraping + endpoint
 	scrapeDetail(&anime, url)
 
 	url = fmt.Sprintf(env.EpisodesURLFormat, anime.ID)
