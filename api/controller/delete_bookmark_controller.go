@@ -19,7 +19,7 @@ type deleteBookmarkRequest struct {
 // @Tags Bookmark
 // @Produce json
 // @Success 200 {object} common.baseResponse
-// @Router /bookmark [delete]
+// @Router /delete [post]
 // @Param request body controller.deleteBookmarkRequest true "request body"
 // @Param Authorization header string true "Insert your auth token" default(Bearer <Add access token here>)
 func DeleteBookmarkHandler(c *gin.Context) {

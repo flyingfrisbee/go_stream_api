@@ -13,5 +13,5 @@ func UserRouter(rg *gin.RouterGroup) {
 	group := rg.Group("/bookmark")
 	group.Use(token.JWTAuthMiddleware())
 	group.POST("/", controller.SaveBookmarkHandler)
-	group.DELETE("/", controller.DeleteBookmarkHandler)
+	group.POST("/delete", controller.DeleteBookmarkHandler)
 }

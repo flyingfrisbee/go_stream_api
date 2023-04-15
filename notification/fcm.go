@@ -11,16 +11,20 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 )
 
 type fcmMessage struct {
-	To           string           `json:"to"`
-	Notification notificationBody `json:"notification"`
+	To   string  `json:"to"`
+	Data fcmData `json:"data"`
 }
 
-type notificationBody struct {
-	Title string `json:"title"`
-	Body  string `json:"body"`
+type fcmData struct {
+	ID            int       `json:"id"`
+	Title         string    `json:"title"`
+	Body          string    `json:"body"`
+	LatestEpisode string    `json:"latest_episode"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type fcmResponse struct {
@@ -83,9 +87,12 @@ func handleNotificationTask(wg *sync.WaitGroup, anime *domain.Anime, userToken s
 func sendNotification(anime *domain.Anime, userToken string) (bool, error) {
 	fcmMessage := fcmMessage{
 		To: userToken,
-		Notification: notificationBody{
-			Title: "New episode available",
-			Body:  fmt.Sprintf(`Ep %s %s`, anime.LatestEpisode, anime.Title),
+		Data: fcmData{
+			ID:            anime.ID,
+			Title:         anime.Title,
+			Body:          fmt.Sprintf("New episode: %s is available to watch", anime.LatestEpisode),
+			LatestEpisode: anime.LatestEpisode,
+			UpdatedAt:     anime.UpdatedAt,
 		},
 	}
 
