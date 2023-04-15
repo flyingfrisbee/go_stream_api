@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"go_stream_api/api/docs"
 	"go_stream_api/api/router"
 	"log"
@@ -36,7 +37,7 @@ func Run() {
 	}
 
 	srv = &http.Server{
-		Addr:    port,
+		Addr:    fmt.Sprintf(":%s", port),
 		Handler: r,
 	}
 
