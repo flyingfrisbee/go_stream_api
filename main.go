@@ -14,9 +14,9 @@ func main() {
 	env.LoadEnvVariables()
 	db.StartConnectionToDB()
 	webhook.StartWebhookService()
+	go webscraper.StartScrapingService()
 	api.Run()
 	<-blockerCh
-	go webscraper.StartScrapingService()
 }
 
 func init() {

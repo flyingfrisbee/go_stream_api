@@ -22,7 +22,7 @@ type episodeCollections struct {
 
 func (ec *episodeCollections) InsertEpisodes(a *domain.Anime, eps []interface{}, n int) error {
 	id := strconv.Itoa(a.ID)
-	collection := ec.conn.client.Database("not_episodes").Collection(id)
+	collection := ec.conn.client.Database("episodes").Collection(id)
 
 	startIndex := 0
 	if n >= 1 {
@@ -48,7 +48,7 @@ func (ec *episodeCollections) InsertEpisodes(a *domain.Anime, eps []interface{},
 
 func (ec *episodeCollections) GetEpisodes(animeID int) ([]domain.Episode, error) {
 	id := strconv.Itoa(animeID)
-	collection := ec.conn.client.Database("not_episodes").Collection(id)
+	collection := ec.conn.client.Database("episodes").Collection(id)
 
 	// Sort episodes ascending
 	opts := options.Find().SetSort(bson.D{{"_id", 1}})
@@ -74,7 +74,7 @@ func (ec *episodeCollections) GetEpisodes(animeID int) ([]domain.Episode, error)
 }
 func (ec *episodeCollections) GetEpisodesCount(animeID int) (int, error) {
 	id := strconv.Itoa(animeID)
-	collection := ec.conn.client.Database("not_episodes").Collection(id)
+	collection := ec.conn.client.Database("episodes").Collection(id)
 
 	docsCount, err := collection.CountDocuments(ec.conn.ctx, bson.D{})
 	if err != nil {

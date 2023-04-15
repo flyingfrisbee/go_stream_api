@@ -1,0 +1,84 @@
+name: deploy 1st half service
+
+on:
+  workflow_dispatch:
+    
+# Set environment variables 
+env:
+  SSL_CERTS_UPPER: ${{ secrets.SSL_CERTS_UPPER_LINE }} 
+  SSL_CERTS_BOTTOM: ${{ secrets.SSL_CERTS_BOTTOM_LINE }}
+  RAILWAY_TOKEN: ${{ secrets.SECRET_FIRST_TOKEN }}
+  RAILWAY_PROJECT_ID: ${{ secrets.PROJECT_FIRST_ID }}
+  RAILWAY_SERVICE_NAME: ${{ secrets.SERVICE_FIRST_NAME }}
+
+jobs:
+
+  unit_test:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+    steps:
+
+    # Checkout branch
+    - name: Checkout
+      uses: actions/checkout@v2.4.2
+
+    # Setup go environment and add it to PATH
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.20'
+
+    # Test all available tests
+    - name: Testing
+      run: go test ./...
+      
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    needs: unit_test
+    steps:
+
+    # Checkout branch
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Alter values with sed
+      run: |
+        sed -i "s|upper_line|$SSL_CERTS_UPPER|g" ./repository/database/prod-ca-2021.crt
+        sed -i "s|bottom_line|$SSL_CERTS_BOTTOM|g" ./repository/database/prod-ca-2021.crt
+        sed -i "s|placeholder1|${{ secrets.API_SECRET_KEY }}|g" .env
+        sed -i "s|placeholder2|${{ secrets.AUTH_TOKEN_VALIDITY_DAYS }}|g" .env
+        sed -i "s|placeholder3|${{ secrets.REFRESH_TOKEN_VALIDITY_DAYS }}|g" .env
+        sed -i "s|placeholder4|${{ secrets.ROUTER_SECRET_PATH }}|g" .env
+        sed -i "s|placeholder5|${{ secrets.ROUTER_SECRET_PATH2 }}|g" .env
+        sed -i "s|placeholder6|${{ secrets.BASE_URL_FOR_SCRAPING }}|g" .env
+        sed -i "s|placeholder7|${{ secrets.EPISODES_URL_FORMAT }}|g" .env
+        sed -i "s|placeholder8|${{ secrets.TITLE_SEARCH_URL_FORMAT }}|g" .env
+        sed -i "s|placeholder9|${{ secrets.FCM_URL }}|g" .env
+        sed -i "s|placeholder10|${{ secrets.HOME_SELECTOR }}|g" .env
+        sed -i "s|placeholder11|${{ secrets.STREAM_SELECTOR }}|g" .env
+        sed -i "s|placeholder12|${{ secrets.EPISODES_SELECTOR }}|g" .env
+        sed -i "s|placeholder13|${{ secrets.DETAIL_SELECTOR }}|g" .env
+        sed -i "s|placeholder14|${{ secrets.TITLES_SELECTOR }}|g" .env
+        sed -i "s|placeholder15|${{ secrets.ID_AT_DETAIL_SELECTOR }}|g" .env
+        sed -i "s|placeholder16|${{ secrets.IMAGE_URL_AT_DETAIL_SELECTOR }}|g" .env
+        sed -i "s|placeholder17|${{ secrets.VIDEO_URL_SELECTOR }}|g" .env
+        sed -i "s|placeholder18|${{ secrets.SUPER_SECRET_KEY1 }}|g" .env
+        sed -i "s|placeholder19|${{ secrets.SUPER_SECRET_KEY2 }}|g" .env
+        sed -i "s|placeholder20|${{ secrets.KEYWORD1 }}|g" .env
+        sed -i "s|placeholder21|${{ secrets.KEYWORD2 }}|g" .env
+        sed -i "s|placeholder22|${{ secrets.KEYWORD3 }}|g" .env
+        sed -i "s|placeholder23|${{ secrets.KEYWORD4 }}|g" .env
+        sed -i "s|placeholder24|${{ secrets.KEYWORD5 }}|g" .env
+        sed -i "s|placeholder25|${{ secrets.RDBMS_CONN_STRING }}|g" .env
+        sed -i "s|placeholder26|${{ secrets.DBMS_CONN_STRING }}|g" .env
+        sed -i "s|placeholder27|0|g" .env
+        sed -i "s|placeholder28|${{ secrets.GH_AUTH_TOKEN }}|g" .env
+        sed -i "s|placeholder29|${{ secrets.FCM_KEY }}|g" .env
+        sed -i "s|placeholder30|${{ secrets.INIT_SQL_PATH }}|g" .env
+
+    # Deploy
+    - name: Deployment
+      run: |
+        curl -fsSL https://railway.app/install.sh | sh
+        railway up --service=$RAILWAY_SERVICE_NAME

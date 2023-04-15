@@ -8,8 +8,11 @@ RUN go build -o /start-go .
 
 FROM alpine:latest
 WORKDIR /app
-COPY --from=base /start-go /app/main
+
 COPY ./.env /app
 COPY ./repository/database/relational/init.sql /app
+COPY ./repository/database/prod-ca-2021.crt /app
+
+COPY --from=base /start-go /app/main
 
 CMD ["/app/main"]
