@@ -154,7 +154,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/domain.RecentAnime"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/domain.RecentAnime"
+                                            }
                                         }
                                     }
                                 }

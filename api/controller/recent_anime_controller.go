@@ -14,7 +14,7 @@ import (
 // @Description This endpoint supports pagination
 // @Tags Anime
 // @Produce json
-// @Success 200 {object} common.baseResponse{data=domain.RecentAnime}
+// @Success 200 {object} common.baseResponse{data=[]domain.RecentAnime}
 // @Router /anime/recent [get]
 // @Param Authorization header string true "Insert your auth token" default(Bearer <Add access token here>)
 // @Param page query int false "Desired page" default(1)

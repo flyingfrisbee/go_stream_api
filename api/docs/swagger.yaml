@@ -221,7 +221,9 @@ paths:
             - $ref: '#/definitions/common.baseResponse'
             - properties:
                 data:
-                  $ref: '#/definitions/domain.RecentAnime'
+                  items:
+                    $ref: '#/definitions/domain.RecentAnime'
+                  type: array
               type: object
       summary: Get recently updated / released anime
       tags:
