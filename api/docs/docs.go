@@ -32,7 +32,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/webscraper.TitleSearchResult"
+                            "$ref": "#/definitions/controller.animeDetailAltRequest"
                         }
                     },
                     {
@@ -359,8 +359,10 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "delete": {
+            }
+        },
+        "/delete": {
+            "post": {
                 "description": "User can delete bookmark to opt out from notification in the future",
                 "produces": [
                     "application/json"
@@ -451,6 +453,23 @@ const docTemplate = `{
                 },
                 "status_code": {
                     "type": "integer"
+                }
+            }
+        },
+        "controller.animeDetailAltRequest": {
+            "type": "object",
+            "required": [
+                "endpoint",
+                "title"
+            ],
+            "properties": {
+                "endpoint": {
+                    "type": "string",
+                    "example": "/category/naruto"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "naruto"
                 }
             }
         },
@@ -618,18 +637,12 @@ const docTemplate = `{
         },
         "webscraper.TitleSearchResult": {
             "type": "object",
-            "required": [
-                "endpoint",
-                "title"
-            ],
             "properties": {
                 "endpoint": {
-                    "type": "string",
-                    "example": "/category/naruto"
+                    "type": "string"
                 },
                 "title": {
-                    "type": "string",
-                    "example": "naruto"
+                    "type": "string"
                 }
             }
         }

@@ -7,6 +7,18 @@ definitions:
       status_code:
         type: integer
     type: object
+  controller.animeDetailAltRequest:
+    properties:
+      endpoint:
+        example: /category/naruto
+        type: string
+      title:
+        example: naruto
+        type: string
+    required:
+    - endpoint
+    - title
+    type: object
   controller.deleteBookmarkRequest:
     properties:
       anime_id:
@@ -116,14 +128,9 @@ definitions:
   webscraper.TitleSearchResult:
     properties:
       endpoint:
-        example: /category/naruto
         type: string
       title:
-        example: naruto
         type: string
-    required:
-    - endpoint
-    - title
     type: object
 info:
   contact: {}
@@ -137,7 +144,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/webscraper.TitleSearchResult'
+          $ref: '#/definitions/controller.animeDetailAltRequest'
       - default: Bearer <Add access token here>
         description: Insert your auth token
         in: header
@@ -317,31 +324,6 @@ paths:
       tags:
       - Anime
   /bookmark:
-    delete:
-      description: User can delete bookmark to opt out from notification in the future
-      parameters:
-      - description: request body
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/controller.deleteBookmarkRequest'
-      - default: Bearer <Add access token here>
-        description: Insert your auth token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/common.baseResponse'
-      summary: Delete bookmark
-      tags:
-      - Bookmark
     post:
       description: User can receive notification from apps when their bookmarked anime
         has new update
@@ -366,6 +348,32 @@ paths:
           schema:
             $ref: '#/definitions/common.baseResponse'
       summary: Save bookmark
+      tags:
+      - Bookmark
+  /delete:
+    post:
+      description: User can delete bookmark to opt out from notification in the future
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/controller.deleteBookmarkRequest'
+      - default: Bearer <Add access token here>
+        description: Insert your auth token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/common.baseResponse'
+      summary: Delete bookmark
       tags:
       - Bookmark
   /token/refresh:

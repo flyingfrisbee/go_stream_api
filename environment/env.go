@@ -65,18 +65,14 @@ var (
 )
 
 func LoadEnvVariables() {
-	err := godotenv.Load()
+	err := getAllRequiredFiles()
 	if err != nil {
-		// Is in production
-		err = getAllRequiredFiles()
-		if err != nil {
-			log.Fatal(err)
-		}
+		log.Fatal(err)
+	}
 
-		err = godotenv.Load("/app/.env")
-		if err != nil {
-			log.Fatal(err)
-		}
+	err = godotenv.Load("/app/.env")
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	CurrentVersion = os.Getenv("CURRENT_VERSION")

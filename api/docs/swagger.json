@@ -21,7 +21,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/webscraper.TitleSearchResult"
+                            "$ref": "#/definitions/controller.animeDetailAltRequest"
                         }
                     },
                     {
@@ -348,8 +348,10 @@
                         }
                     }
                 }
-            },
-            "delete": {
+            }
+        },
+        "/delete": {
+            "post": {
                 "description": "User can delete bookmark to opt out from notification in the future",
                 "produces": [
                     "application/json"
@@ -440,6 +442,23 @@
                 },
                 "status_code": {
                     "type": "integer"
+                }
+            }
+        },
+        "controller.animeDetailAltRequest": {
+            "type": "object",
+            "required": [
+                "endpoint",
+                "title"
+            ],
+            "properties": {
+                "endpoint": {
+                    "type": "string",
+                    "example": "/category/naruto"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "naruto"
                 }
             }
         },
@@ -607,18 +626,12 @@
         },
         "webscraper.TitleSearchResult": {
             "type": "object",
-            "required": [
-                "endpoint",
-                "title"
-            ],
             "properties": {
                 "endpoint": {
-                    "type": "string",
-                    "example": "/category/naruto"
+                    "type": "string"
                 },
                 "title": {
-                    "type": "string",
-                    "example": "naruto"
+                    "type": "string"
                 }
             }
         }
