@@ -1,13 +1,19 @@
 package environment
 
 import (
+	"io"
 	"log"
+	"net/http"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
 
 var (
+	// Versioning
+	CurrentVersion string
+
 	// Token related
 	APISecretKey             string
 	AuthTokenValidityDays    string
@@ -48,9 +54,6 @@ var (
 	RDBMSConnString string
 	DBMSConnString  string
 
-	// Versioning
-	CurrentVersion string
-
 	// Token
 	GHAuthToken string
 
@@ -64,12 +67,19 @@ var (
 func LoadEnvVariables() {
 	err := godotenv.Load()
 	if err != nil {
+		// Is in production
+		err = getAllRequiredFiles()
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		err = godotenv.Load("/app/.env")
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
+	CurrentVersion = os.Getenv("CURRENT_VERSION")
 	APISecretKey = os.Getenv("API_SECRET_KEY")
 	AuthTokenValidityDays = os.Getenv("AUTH_TOKEN_VALIDITY_DAYS")
 	RefreshTokenValidityDays = os.Getenv("REFRESH_TOKEN_VALIDITY_DAYS")
@@ -96,8 +106,53 @@ func LoadEnvVariables() {
 	Keyword5 = os.Getenv("KEYWORD5")
 	RDBMSConnString = os.Getenv("RDBMS_CONN_STRING")
 	DBMSConnString = os.Getenv("DBMS_CONN_STRING")
-	CurrentVersion = os.Getenv("CURRENT_VERSION")
 	GHAuthToken = os.Getenv("GH_AUTH_TOKEN")
 	FCMKey = os.Getenv("FCM_KEY")
 	InitSQLPath = os.Getenv("INIT_SQL_PATH")
+}
+
+func getAllRequiredFiles() error {
+	fileBytes, err := os.ReadFile("/app/urls.txt")
+	if err != nil {
+		return err
+	}
+
+	sliceFileBytes := strings.Split(string(fileBytes), "\n")
+	envURL := sliceFileBytes[0]
+	certsURL := sliceFileBytes[1]
+
+	err = downloadFile(envURL, "/app/.env")
+	if err != nil {
+		return err
+	}
+
+	err = downloadFile(certsURL, "/app/prod-ca-2021.crt")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func downloadFile(downloadURL, dstPath string) error {
+	resp, err := http.Get(downloadURL)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	f, err := os.OpenFile(dstPath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	fileBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	f.Write(fileBytes)
+
+	return nil
 }

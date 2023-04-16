@@ -11,7 +11,7 @@ WORKDIR /app
 
 COPY ./.env /app
 COPY ./repository/database/relational/init.sql /app
-COPY ./repository/database/prod-ca-2021.crt /app
+COPY ./urls.txt /app
 
 COPY --from=base /start-go /app/main
 
