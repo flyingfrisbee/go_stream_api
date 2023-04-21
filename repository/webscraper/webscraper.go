@@ -74,6 +74,11 @@ func runScrapeLoop() {
 }
 
 func processAnime(a *domain.Anime) error {
+	// Scraper failed to get anime id or episodes, return early
+	if a.ID == 0 || len(a.Episodes) == 0 {
+		return nil
+	}
+
 	// Get enum by comparing latest episode
 	latestEpisode, err := db.Conn.Pg.GetLatestEpisode(a.ID)
 	if err != nil {
@@ -117,12 +122,14 @@ func processAnime(a *domain.Anime) error {
 				return err
 			}
 			newEpsCount := len(a.Episodes) - epsCount
-			rowsInserted, err := db.Conn.Pg.InsertEpisodesToPostgres(a, newEpsCount)
-			if err != nil {
-				return err
-			}
-			if rowsInserted < 1 {
-				return fmt.Errorf("failed inserting episodes of anime %s", a.Title)
+			if newEpsCount >= 1 {
+				rowsInserted, err := db.Conn.Pg.InsertEpisodesToPostgres(a, newEpsCount)
+				if err != nil {
+					return err
+				}
+				if rowsInserted < 1 {
+					return fmt.Errorf("failed inserting episodes of anime %s", a.Title)
+				}
 			}
 		case domain.NoChangesFound:
 		}
@@ -150,9 +157,11 @@ func processAnime(a *domain.Anime) error {
 				return err
 			}
 			newEpsCount := len(episodes) - epsCount
-			err = db.Conn.Mongo.InsertEpisodes(a, episodes, newEpsCount)
-			if err != nil {
-				return err
+			if newEpsCount >= 1 {
+				err = db.Conn.Mongo.InsertEpisodes(a, episodes, newEpsCount)
+				if err != nil {
+					return err
+				}
 			}
 		case domain.NoChangesFound:
 		}
