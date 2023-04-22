@@ -10,8 +10,7 @@ import (
 
 type animeRelatedQuery interface {
 	UpsertAnime(*domain.Anime) error
-	// Insert last n episodes to postgres. If n < 1 then all episodes will be inserted
-	InsertEpisodesToPostgres(anime *domain.Anime, n int) (int, error)
+	InsertEpisodes(anime *domain.Anime) error
 	GetRecentAnimes(page int) ([]domain.RecentAnime, error)
 	GetLatestEpisode(animeID int) (*string, error)
 	GetEpisodesCount(anime *domain.Anime) (int, error)
@@ -37,31 +36,31 @@ func (a *animeTable) UpsertAnime(anime *domain.Anime) error {
 	return nil
 }
 
-func (a *animeTable) InsertEpisodesToPostgres(anime *domain.Anime, n int) (int, error) {
-	values := [][]interface{}{}
+func (a *animeTable) InsertEpisodes(anime *domain.Anime) error {
+	episodesAsAny := []interface{}{}
 
-	startIndex := 0
-	if n >= 1 {
-		startIndex = len(anime.Episodes) - n
-		if startIndex < 0 {
-			return 0, fmt.Errorf("starting index for episodes slice cannot be less than 0, got %d", startIndex)
-		}
+	var sb strings.Builder
+	counter := 1
+	for _, episode := range anime.Episodes {
+		episodesAsAny = append(episodesAsAny, anime.ID, episode.Text, episode.Endpoint)
+
+		valuesText := fmt.Sprintf(`($%d, $%d, $%d),`, counter, counter+1, counter+2)
+		sb.WriteString(valuesText)
+		counter += 3
 	}
 
-	for _, episode := range anime.Episodes[startIndex:] {
-		row := []interface{}{anime.ID, episode.Text, episode.Endpoint}
-		values = append(values, row)
-	}
+	valuesSQL := sb.String()
+	// Remove last comma
+	valuesSQL = valuesSQL[:len(valuesSQL)-1]
 
-	insertedRow, err := a.conn.pool.CopyFrom(
-		a.conn.ctx, pgx.Identifier{"stream_anime", "episode"},
-		[]string{"anime_id", "text", "endpoint"}, pgx.CopyFromRows(values),
-	)
+	insertEpisodesQuery := fmt.Sprintf(insertEpisodesFormat, valuesSQL)
+
+	_, err := a.conn.pool.Exec(a.conn.ctx, insertEpisodesQuery, episodesAsAny...)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	return int(insertedRow), nil
+	return nil
 }
 
 func (a *animeTable) GetRecentAnimes(page int) ([]domain.RecentAnime, error) {
@@ -212,6 +211,11 @@ var (
 		image_url = EXCLUDED.image_url,
 		latest_episode = EXCLUDED.latest_episode,
 		updated_at = EXCLUDED.updated_at;`
+
+	insertEpisodesFormat = `
+	INSERT INTO stream_anime.episode (anime_id, text, endpoint)
+	VALUES %s
+	ON CONFLICT (endpoint) DO NOTHING;`
 
 	recentAnimeQuery = `
 	SELECT id, title, image_url, latest_episode, updated_at

@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS stream_anime.episode (
 	text varchar NOT NULL,
 	endpoint varchar NOT NULL,
 	CONSTRAINT episode_pk PRIMARY KEY (id),
+	CONSTRAINT episode_un UNIQUE (endpoint),
 	CONSTRAINT episode_anime_anime_id_fk FOREIGN KEY (anime_id) REFERENCES stream_anime.anime(id)
 );
 
