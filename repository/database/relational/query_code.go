@@ -18,7 +18,15 @@ type codeTable struct {
 }
 
 func (c *codeTable) InsertCodes(codes []string) error {
-	values := strings.Join(codes, ",")
+	var sb strings.Builder
+	for _, code := range codes {
+		sb.WriteString(fmt.Sprintf("('%s'),", code))
+	}
+
+	values := sb.String()
+	// Remove last comma
+	values = values[:(len(values) - 1)]
+
 	query := fmt.Sprintf(insertCodesFormat, values)
 
 	_, err := c.conn.pool.Exec(c.conn.ctx, query)
@@ -65,7 +73,7 @@ func (c *codeTable) DeleteCodes() error {
 
 var (
 	insertCodesFormat = `
-	INSERT INTO hsr_related.code (key) VALUES (%s);`
+	INSERT INTO hsr_related.code (key) VALUES %s;`
 
 	getCodesQuery = `
 	SELECT * FROM hsr_related.code;`
