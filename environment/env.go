@@ -28,6 +28,7 @@ var (
 	EpisodesURLFormat    string
 	TitleSearchURLFormat string
 	FCMURL               string
+	RedemptionCodeURL    string
 
 	// CSS selectors
 	HomeSelector             string
@@ -85,6 +86,7 @@ func LoadEnvVariables() {
 	EpisodesURLFormat = os.Getenv("EPISODES_URL_FORMAT")
 	TitleSearchURLFormat = os.Getenv("TITLE_SEARCH_URL_FORMAT")
 	FCMURL = os.Getenv("FCM_URL")
+	RedemptionCodeURL = os.Getenv("REDEMPTION_CODE_URL")
 	HomeSelector = os.Getenv("HOME_SELECTOR")
 	StreamSelector = os.Getenv("STREAM_SELECTOR")
 	EpisodesSelector = os.Getenv("EPISODES_SELECTOR")

@@ -5,6 +5,7 @@ import "fmt"
 type userRelatedQuery interface {
 	InsertUser(userToken string) error
 	InsertBookmark(animeID int, userToken, latestEpisode string) error
+	GetAllUsersToken() ([]string, error)
 	GetUsersTokenByAnimeID(animeID int) ([]string, error)
 	UpdateBookmarkedLatestEpisode(animeID int, latestEp string) error
 	DeleteBookmark(animeID int, userToken string) error
@@ -33,6 +34,26 @@ func (u *userTable) InsertBookmark(animeID int, userToken, latestEpisode string)
 	}
 
 	return nil
+}
+
+func (u *userTable) GetAllUsersToken() ([]string, error) {
+	rows, err := u.conn.pool.Query(u.conn.ctx, getAllUsersTokenQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	usersToken := []string{}
+	for rows.Next() {
+		var userToken string
+		err = rows.Scan(&userToken)
+		if err != nil {
+			return nil, err
+		}
+
+		usersToken = append(usersToken, userToken)
+	}
+
+	return usersToken, nil
 }
 
 func (u *userTable) GetUsersTokenByAnimeID(animeID int) ([]string, error) {
@@ -111,6 +132,9 @@ var (
 		(SELECT id FROM stream_anime.user WHERE user_token = $1),
 		$2, $3
 	);`
+
+	getAllUsersTokenQuery = `
+	SELECT user_token FROM stream_anime.user;`
 
 	getUsersTokenByAnimeIDQuery = `
 	SELECT u.user_token FROM stream_anime.user_anime_xref uax 

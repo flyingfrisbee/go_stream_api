@@ -39,3 +39,10 @@ CREATE TABLE IF NOT EXISTS stream_anime.user_anime_xref (
 	CONSTRAINT user_anime_xref_user_fk FOREIGN KEY (user_id) REFERENCES stream_anime."user"(id),
 	CONSTRAINT user_anime_xref_anime_fk FOREIGN KEY (anime_id) REFERENCES stream_anime.anime(id)
 );
+
+CREATE SCHEMA IF NOT EXISTS hsr_related;
+
+CREATE TABLE IF NOT EXISTS hsr_related.code (
+	key varchar NOT NULL,
+	CONSTRAINT code_pk PRIMARY KEY (key)
+);

@@ -15,8 +15,8 @@ import (
 )
 
 type fcmMessage struct {
-	To   string  `json:"to"`
-	Data fcmData `json:"data"`
+	To   string      `json:"to"`
+	Data interface{} `json:"data"`
 }
 
 type fcmData struct {

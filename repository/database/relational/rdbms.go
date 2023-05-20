@@ -13,6 +13,7 @@ type PostgresInstance struct {
 	postgresConn
 	animeRelatedQuery
 	userRelatedQuery
+	codeRelatedQuery
 }
 
 type postgresConn struct {
@@ -58,6 +59,7 @@ func StartConnection(ctx context.Context) *PostgresInstance {
 		postgresConn:      pgConn,
 		animeRelatedQuery: &animeTable{conn: pgConn},
 		userRelatedQuery:  &userTable{conn: pgConn},
+		codeRelatedQuery:  &codeTable{conn: pgConn},
 	}
 
 	instance.initializeTables()

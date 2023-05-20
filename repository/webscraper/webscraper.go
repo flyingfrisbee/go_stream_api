@@ -23,14 +23,17 @@ var (
 func StartScrapingService() {
 	wg.Add(1)
 	ctx, cancel = context.WithCancel(context.Background())
+	scheduler := initRedemptionCodeScheduler()
 
 	for {
 		select {
 		case <-ctx.Done():
 			log.Println("Stopping scraping service...")
 			wg.Done()
+			scheduler.stopScheduler()
 			return
 		default:
+			scheduler.runSchedulerAsync()
 			runScrapeLoop()
 		}
 	}
