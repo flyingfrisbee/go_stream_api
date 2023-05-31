@@ -13,7 +13,7 @@ import (
 )
 
 func scrapeDetail(a *domain.Anime, url string) {
-	c := colly.NewCollector()
+	c := createNewCollectorWithCustomTimeout(1 * time.Minute)
 
 	c.OnHTML(env.DetailSelector, func(e *colly.HTMLElement) {
 		switch {
@@ -41,7 +41,7 @@ func scrapeDetail(a *domain.Anime, url string) {
 	c.Visit(url)
 
 	if a.ID == 0 {
-		c = colly.NewCollector()
+		c := createNewCollectorWithCustomTimeout(1 * time.Minute)
 		c.OnHTML(env.IDAtDetailSelector, func(e *colly.HTMLElement) {
 			idString := e.Attr(env.SuperSecretKey2)
 			if idString != "" {
@@ -56,7 +56,7 @@ func scrapeDetail(a *domain.Anime, url string) {
 		c.OnError(errorCallback)
 		c.Visit(url)
 
-		c = colly.NewCollector()
+		c = createNewCollectorWithCustomTimeout(1 * time.Minute)
 		c.OnHTML(env.ImageURLAtDetailSelector, func(e *colly.HTMLElement) {
 			imageURL := e.Attr("src")
 			a.ImageURL = imageURL
@@ -67,7 +67,7 @@ func scrapeDetail(a *domain.Anime, url string) {
 }
 
 func scrapeEpisodes(a *domain.Anime, url string) {
-	c := colly.NewCollector()
+	c := createNewCollectorWithCustomTimeout(1 * time.Minute)
 
 	c.OnHTML(env.EpisodesSelector, func(e *colly.HTMLElement) {
 		episodeText := strings.Replace(e.ChildText("div:first-child"), "EP ", "", 1)
@@ -86,7 +86,7 @@ func scrapeEpisodes(a *domain.Anime, url string) {
 }
 
 func scrapeStream(a *domain.Anime, url string) {
-	c := colly.NewCollector()
+	c := createNewCollectorWithCustomTimeout(1 * time.Minute)
 
 	c.OnHTML(env.StreamSelector, func(e *colly.HTMLElement) {
 		idString := e.ChildAttr(env.SuperSecretKey1, env.SuperSecretKey2)

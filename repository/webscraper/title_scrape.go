@@ -3,6 +3,7 @@ package webscraper
 import (
 	"fmt"
 	env "go_stream_api/environment"
+	"time"
 
 	"github.com/gocolly/colly"
 )
@@ -15,7 +16,7 @@ type TitleSearchResult struct {
 func ScrapeAnimeTitlesByKeyword(keyword string) []TitleSearchResult {
 	result := []TitleSearchResult{}
 
-	c := colly.NewCollector()
+	c := createNewCollectorWithCustomTimeout(1 * time.Minute)
 
 	c.OnHTML(env.TitlesSelector, func(e *colly.HTMLElement) {
 		title := e.Text

@@ -4,6 +4,7 @@ import (
 	env "go_stream_api/environment"
 	"go_stream_api/repository/database/domain"
 	"strings"
+	"time"
 
 	"github.com/gocolly/colly"
 )
@@ -11,7 +12,7 @@ import (
 func scrapeHome(url string) []domain.Anime {
 	animes := []domain.Anime{}
 
-	c := colly.NewCollector()
+	c := createNewCollectorWithCustomTimeout(1 * time.Minute)
 
 	c.OnHTML(env.HomeSelector, func(e *colly.HTMLElement) {
 		title := e.ChildText(".name > a")

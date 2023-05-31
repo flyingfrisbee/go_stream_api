@@ -179,3 +179,9 @@ func errorCallback(r *colly.Response, err error) {
 		err.Error(),
 	)
 }
+
+func createNewCollectorWithCustomTimeout(timeout time.Duration) *colly.Collector {
+	return colly.NewCollector(func(c *colly.Collector) {
+		c.SetRequestTimeout(timeout)
+	})
+}

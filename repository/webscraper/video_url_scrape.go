@@ -4,6 +4,7 @@ import (
 	"fmt"
 	env "go_stream_api/environment"
 	"regexp"
+	"time"
 
 	"github.com/gocolly/colly"
 )
@@ -11,7 +12,7 @@ import (
 func ScrapeVideoURL(episodeEndpoint string) string {
 	var videoURL string
 
-	c := colly.NewCollector()
+	c := createNewCollectorWithCustomTimeout(1 * time.Minute)
 
 	c.OnHTML(env.VideoURLSelector, func(e *colly.HTMLElement) {
 		videoURL = e.Attr("src")

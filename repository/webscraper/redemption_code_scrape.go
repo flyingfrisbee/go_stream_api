@@ -34,7 +34,7 @@ func (r *redemptionCodeScheduler) stopScheduler() {
 func (r *redemptionCodeScheduler) scrapeRedemptionCode() {
 	codes := []string{}
 
-	c := colly.NewCollector()
+	c := createNewCollectorWithCustomTimeout(1 * time.Minute)
 
 	c.OnHTML(".codes > div > .code", func(e *colly.HTMLElement) {
 		codes = append(codes, e.Text)
