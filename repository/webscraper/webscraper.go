@@ -178,6 +178,9 @@ func errorCallback(r *colly.Response, err error) {
 		r.Request.URL.String(),
 		err.Error(),
 	)
+
+	time.Sleep(5 * time.Second)
+	r.Request.Retry()
 }
 
 func createNewCollectorWithCustomTimeout(timeout time.Duration) *colly.Collector {

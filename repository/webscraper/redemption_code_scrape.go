@@ -44,9 +44,11 @@ func (r *redemptionCodeScheduler) scrapeRedemptionCode() {
 
 	c.Visit(r.urlToVisit)
 
-	r.codes = codes
+	if len(codes) != 0 {
+		r.codes = codes
 
-	r.handleCodesDistribution()
+		r.handleCodesDistribution()
+	}
 }
 
 func (r *redemptionCodeScheduler) handleCodesDistribution() {
