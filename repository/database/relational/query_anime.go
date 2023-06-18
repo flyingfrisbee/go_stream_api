@@ -237,7 +237,8 @@ var (
 
 	episodesQuery = `
 	SELECT text, endpoint from stream_anime.episode
-	WHERE anime_id = $1;`
+	WHERE anime_id = $1
+	ORDER BY id ASC;`
 
 	animeDetailQuery = `
 	SELECT * FROM stream_anime.anime
