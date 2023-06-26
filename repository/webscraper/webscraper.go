@@ -22,8 +22,11 @@ var (
 
 func StartScrapingService() {
 	wg.Add(1)
-	ctx, cancel = context.WithCancel(context.Background())
+
 	scheduler := initRedemptionCodeScheduler()
+	scheduler.runSchedulerAsync()
+
+	ctx, cancel = context.WithCancel(context.Background())
 
 	for {
 		select {
@@ -33,7 +36,6 @@ func StartScrapingService() {
 			scheduler.stopScheduler()
 			return
 		default:
-			scheduler.runSchedulerAsync()
 			runScrapeLoop()
 		}
 	}
@@ -47,6 +49,12 @@ func Stop() {
 
 // Scrape data and save to database
 func runScrapeLoop() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(err)
+		}
+	}()
+
 	baseTime := time.Now().UTC()
 
 	for i := 1; i <= 10; i++ {
@@ -173,14 +181,12 @@ func processAnime(a *domain.Anime) error {
 }
 
 func errorCallback(r *colly.Response, err error) {
-	log.Printf(
+	errMsg := fmt.Sprintf(
 		"error when visiting %s\nerror message: %s\n",
 		r.Request.URL.String(),
 		err.Error(),
 	)
-
-	time.Sleep(5 * time.Second)
-	r.Request.Retry()
+	panic(errMsg)
 }
 
 func createNewCollectorWithCustomTimeout(timeout time.Duration) *colly.Collector {

@@ -40,7 +40,12 @@ func (r *redemptionCodeScheduler) scrapeRedemptionCode() {
 		codes = append(codes, e.Text)
 	})
 
-	c.OnError(errorCallback)
+	c.OnError(func(r *colly.Response, err error) {
+		log.Printf(
+			"redemption code scraping error: %s\n",
+			err.Error(),
+		)
+	})
 
 	c.Visit(r.urlToVisit)
 
