@@ -23,6 +23,8 @@ type animeDetailAltRequest struct {
 // @Param request body controller.animeDetailAltRequest true "request body"
 // @Param Authorization header string true "Insert your auth token" default(Bearer <Add access token here>)
 func AnimeDetailAlternativeHandler(c *gin.Context) {
+	defer common.RecoverWhenPanic(c, "Cannot reach scraping server")
+
 	var request animeDetailAltRequest
 	err := c.ShouldBindJSON(&request)
 	if err != nil {

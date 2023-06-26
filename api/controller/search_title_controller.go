@@ -19,6 +19,8 @@ import (
 // @Param Authorization header string true "Insert your auth token" default(Bearer <Add access token here>)
 // @Param keywords query string true "Keywords of anime title" default(Naruto)
 func SearchTitleHandler(c *gin.Context) {
+	defer common.RecoverWhenPanic(c, "Cannot reach scraping server")
+
 	values := c.Request.URL.Query()
 	// Remove leading and trailing white spaces
 	keywords := strings.Trim(values["keywords"][0], " ")

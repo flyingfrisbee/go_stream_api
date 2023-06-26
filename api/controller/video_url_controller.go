@@ -25,6 +25,8 @@ type videoURLResponse struct {
 // @Param request body controller.videoURLRequest true "request body"
 // @Param Authorization header string true "Insert your auth token" default(Bearer <Add access token here>)
 func VideoURLHandler(c *gin.Context) {
+	defer common.RecoverWhenPanic(c, "Cannot reach scraping server")
+
 	var request videoURLRequest
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
