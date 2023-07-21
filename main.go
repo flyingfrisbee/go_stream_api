@@ -5,7 +5,6 @@ import (
 	env "go_stream_api/environment"
 	db "go_stream_api/repository/database"
 	"go_stream_api/repository/webscraper"
-	"go_stream_api/webhook"
 )
 
 var blockerCh chan struct{}
@@ -13,7 +12,7 @@ var blockerCh chan struct{}
 func main() {
 	env.LoadEnvVariables()
 	db.StartConnectionToDB()
-	webhook.StartWebhookService()
+	// webhook.StartWebhookService()
 	go webscraper.StartScrapingService()
 	api.Run()
 	<-blockerCh
