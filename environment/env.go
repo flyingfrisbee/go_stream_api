@@ -6,7 +6,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/go-co-op/gocron"
 	"github.com/joho/godotenv"
 )
 
@@ -107,6 +109,11 @@ func LoadEnvVariables() {
 	GHAuthToken = os.Getenv("GH_AUTH_TOKEN")
 	FCMKey = os.Getenv("FCM_KEY")
 	InitSQLPath = os.Getenv("INIT_SQL_PATH")
+
+	err = setSchedulerForBaseURLValidation()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func getAllRequiredFiles() error {
@@ -153,4 +160,42 @@ func downloadFile(downloadURL, dstPath string) error {
 	f.Write(fileBytes)
 
 	return nil
+}
+
+// This scheduler was made because the site for scraping for some reason
+// took a long time for redirection, causing context timeout
+func setSchedulerForBaseURLValidation() error {
+	sched := gocron.NewScheduler(time.Local)
+	_, err := sched.Cron("*/5 * * * *").Do(modifyBaseURLIfRequired)
+	if err != nil {
+		return err
+	}
+	sched.StartAsync()
+
+	return nil
+}
+
+func modifyBaseURLIfRequired() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("error occured when validating base url\n")
+		}
+	}()
+	resp, err := http.Get(BaseURLForScraping)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer resp.Body.Close()
+
+	redirectOccured := !strings.Contains(BaseURLForScraping, resp.Request.URL.Host)
+	if redirectOccured {
+		newURL := strings.Replace(
+			resp.Request.URL.String(),
+			"http://",
+			"https://",
+			1,
+		)
+		BaseURLForScraping = newURL
+	}
 }

@@ -1,6 +1,9 @@
 name: deploy 2nd half service
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     
 # Set environment variables 
