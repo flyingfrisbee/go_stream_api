@@ -3,12 +3,11 @@ package controller
 import (
 	"fmt"
 	"go_stream_api/api/common"
+	env "go_stream_api/environment"
 	db "go_stream_api/repository/database"
-	"go_stream_api/repository/database/domain"
 	ws "go_stream_api/repository/webscraper"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -51,18 +50,11 @@ func AnimeDetailHandler(c *gin.Context) {
 	}
 	anime.Episodes = eps
 
-	var altAnime domain.Anime
-	if len(eps) == 0 || len(eps) == 30 {
-		// to prevent getting episodes from outdated data (postgres)
-		idx := strings.LastIndex(anime.ImageURL, "/")
-		if idx == -1 {
-			common.WrapWithBaseResponse(c, nil, fmt.Sprintf("failed to scrape episodes for title: %s", anime.Title), http.StatusInternalServerError)
-			return
-		}
-		endpoint := anime.ImageURL[idx+1:]
-		idx = strings.LastIndex(endpoint, ".")
-		altAnime = ws.ScrapeDetailAlternative(anime.Title, fmt.Sprintf("/category/%s", endpoint[:idx]))
-		anime.Episodes = altAnime.Episodes
+	shouldFetchEpisodesFromScraper := len(eps) == 0 || len(eps) == 30
+	if shouldFetchEpisodesFromScraper {
+		url := fmt.Sprintf(env.EpisodesURLFormat, anime.ID)
+		ws.ScrapeEpisodes(&anime, url)
+		ws.ReverseEpisodesOrder(&anime)
 	}
 
 	msg := fmt.Sprintf("Success fetching anime detail with id: %d", animeID)

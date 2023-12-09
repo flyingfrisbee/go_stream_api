@@ -66,7 +66,7 @@ func scrapeDetail(a *domain.Anime, url string) {
 	}
 }
 
-func scrapeEpisodes(a *domain.Anime, url string) {
+func ScrapeEpisodes(a *domain.Anime, url string) {
 	c := createNewCollectorWithCustomTimeout(1 * time.Minute)
 
 	c.OnHTML(env.EpisodesSelector, func(e *colly.HTMLElement) {
@@ -111,7 +111,7 @@ func scrapeStream(a *domain.Anime, url string) {
 	c.Visit(url)
 }
 
-func reverseEpisodesOrder(a *domain.Anime) {
+func ReverseEpisodesOrder(a *domain.Anime) {
 	result := []domain.Episode{}
 
 	length := len(a.Episodes)
@@ -137,11 +137,11 @@ func ScrapeDetailAlternative(title, endpoint string) domain.Anime {
 	scrapeDetail(&anime, url)
 
 	url = fmt.Sprintf(env.EpisodesURLFormat, anime.ID)
-	scrapeEpisodes(&anime, url)
+	ScrapeEpisodes(&anime, url)
 
 	// Necessary because the order from scraping is descending.
 	// Ascending is preferable hence the function call
-	reverseEpisodesOrder(&anime)
+	ReverseEpisodesOrder(&anime)
 
 	return anime
 }

@@ -66,14 +66,14 @@ func runScrapeLoop() {
 			scrapeStream(&anime, url)
 
 			url = fmt.Sprintf(env.EpisodesURLFormat, anime.ID)
-			scrapeEpisodes(&anime, url)
+			ScrapeEpisodes(&anime, url)
 
 			url = env.BaseURLForScraping + anime.DetailEndpoint
 			scrapeDetail(&anime, url)
 
 			// Necessary because the order from scraping is descending.
 			// Ascending is preferable hence the function call
-			reverseEpisodesOrder(&anime)
+			ReverseEpisodesOrder(&anime)
 			calculateUpdateTime(&anime, baseTime)
 
 			err := processAnime(&anime)
