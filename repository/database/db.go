@@ -4,7 +4,6 @@ import (
 	"context"
 	nonrelational "go_stream_api/repository/database/non_relational"
 	"go_stream_api/repository/database/relational"
-	"log"
 )
 
 type PersistentStorageType int
@@ -29,15 +28,16 @@ func StartConnectionToDB() {
 	Conn = dbConn{
 		cancel: cancel,
 		Pg:     relational.StartConnection(ctx),
-		Mongo:  nonrelational.StartConnection(ctx),
+		Mongo:  nil,
+		// Mongo:  nonrelational.StartConnection(ctx),
 	}
 }
 
 func TerminateConnectionToDB() {
 	Conn.Pg.CloseConnection()
-	err := Conn.Mongo.CloseConnection()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err := Conn.Mongo.CloseConnection()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 	Conn.cancel()
 }

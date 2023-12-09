@@ -36,9 +36,11 @@ func SendCodesNotificationToUsers(newCodes []string) error {
 
 func sendCodesNotification(userToken, codes string) error {
 	fcmMessage := fcmMessage{
-		To: userToken,
-		Data: codesPayload{
-			Codes: codes,
+		Message: message{
+			Token: userToken,
+			Data: codesPayload{
+				Codes: codes,
+			},
 		},
 	}
 
@@ -47,12 +49,13 @@ func sendCodesNotification(userToken, codes string) error {
 		return err
 	}
 
-	r, err := http.NewRequest("POST", env.FCMURL, bytes.NewBuffer(jsonBytes))
+	url := fmt.Sprintf(env.FCMURLFormat, env.FirebaseProjectID)
+	r, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBytes))
 	if err != nil {
 		return err
 	}
 
-	r.Header.Set("Authorization", fmt.Sprintf("key=%s", env.FCMKey))
+	r.Header.Set("Authorization", fmt.Sprintf("Bearer %s", oauthToken))
 	r.Header.Set("Content-type", "application/json")
 
 	client := &http.Client{}

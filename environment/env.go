@@ -29,7 +29,7 @@ var (
 	BaseURLForScraping   string
 	EpisodesURLFormat    string
 	TitleSearchURLFormat string
-	FCMURL               string
+	FCMURLFormat         string
 	RedemptionCodeURL    string
 
 	// CSS selectors
@@ -61,19 +61,19 @@ var (
 	GHAuthToken string
 
 	// FCM
-	FCMKey string
+	FirebaseProjectID string
 
 	// Static file path
 	InitSQLPath string
 )
 
 func LoadEnvVariables() {
-	err := getAllRequiredFiles()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err := getAllRequiredFiles()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	err = godotenv.Load("/app/.env")
+	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,7 +87,7 @@ func LoadEnvVariables() {
 	BaseURLForScraping = os.Getenv("BASE_URL_FOR_SCRAPING")
 	EpisodesURLFormat = os.Getenv("EPISODES_URL_FORMAT")
 	TitleSearchURLFormat = os.Getenv("TITLE_SEARCH_URL_FORMAT")
-	FCMURL = os.Getenv("FCM_URL")
+	FCMURLFormat = os.Getenv("FCM_URL_FORMAT")
 	RedemptionCodeURL = os.Getenv("REDEMPTION_CODE_URL")
 	HomeSelector = os.Getenv("HOME_SELECTOR")
 	StreamSelector = os.Getenv("STREAM_SELECTOR")
@@ -107,7 +107,7 @@ func LoadEnvVariables() {
 	RDBMSConnString = os.Getenv("RDBMS_CONN_STRING")
 	DBMSConnString = os.Getenv("DBMS_CONN_STRING")
 	GHAuthToken = os.Getenv("GH_AUTH_TOKEN")
-	FCMKey = os.Getenv("FCM_KEY")
+	FirebaseProjectID = os.Getenv("FIREBASE_PROJECT_ID")
 	InitSQLPath = os.Getenv("INIT_SQL_PATH")
 
 	err = setSchedulerForBaseURLValidation()

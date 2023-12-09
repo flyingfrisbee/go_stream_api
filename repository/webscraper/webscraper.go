@@ -134,41 +134,41 @@ func processAnime(a *domain.Anime) error {
 			if err != nil {
 				return err
 			}
-			episodes := a.GetEpisodesAsSliceInterface()
-			err = db.Conn.Mongo.InsertEpisodes(a, episodes, 0)
-			if err != nil {
-				return err
-			}
+			// episodes := a.GetEpisodesAsSliceInterface()
+			// err = db.Conn.Mongo.InsertEpisodes(a, episodes, 0)
+			// if err != nil {
+			// 	return err
+			// }
 		case domain.NewEpisodeFound:
 			err = db.Conn.Pg.UpsertAnime(a)
 			if err != nil {
 				return err
 			}
-			episodes := a.GetEpisodesAsSliceInterface()
-			epsCount, err := db.Conn.Mongo.GetEpisodesCount(a.ID)
-			if err != nil {
-				return err
-			}
-			newEpsCount := len(episodes) - epsCount
-			if newEpsCount >= 1 {
-				err = db.Conn.Mongo.InsertEpisodes(a, episodes, newEpsCount)
-				if err != nil {
-					return err
-				}
-			}
+			// episodes := a.GetEpisodesAsSliceInterface()
+			// epsCount, err := db.Conn.Mongo.GetEpisodesCount(a.ID)
+			// if err != nil {
+			// 	return err
+			// }
+			// newEpsCount := len(episodes) - epsCount
+			// if newEpsCount >= 1 {
+			// 	err = db.Conn.Mongo.InsertEpisodes(a, episodes, newEpsCount)
+			// 	if err != nil {
+			// 		return err
+			// 	}
+			// }
 		case domain.NoChangesFound:
-			episodes := a.GetEpisodesAsSliceInterface()
-			epsCount, err := db.Conn.Mongo.GetEpisodesCount(a.ID)
-			if err != nil {
-				return err
-			}
-			newEpsCount := len(episodes) - epsCount
-			if newEpsCount >= 1 {
-				err = db.Conn.Mongo.InsertEpisodes(a, episodes, newEpsCount)
-				if err != nil {
-					return err
-				}
-			}
+			// episodes := a.GetEpisodesAsSliceInterface()
+			// epsCount, err := db.Conn.Mongo.GetEpisodesCount(a.ID)
+			// if err != nil {
+			// 	return err
+			// }
+			// newEpsCount := len(episodes) - epsCount
+			// if newEpsCount >= 1 {
+			// 	err = db.Conn.Mongo.InsertEpisodes(a, episodes, newEpsCount)
+			// 	if err != nil {
+			// 		return err
+			// 	}
+			// }
 		}
 	}
 
