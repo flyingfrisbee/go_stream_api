@@ -52,6 +52,7 @@ func AnimeDetailHandler(c *gin.Context) {
 
 	shouldFetchEpisodesFromScraper := len(eps) == 0 || len(eps) == 30
 	if shouldFetchEpisodesFromScraper {
+		anime.Episodes = nil
 		url := fmt.Sprintf(env.EpisodesURLFormat, anime.ID)
 		ws.ScrapeEpisodes(&anime, url)
 		ws.ReverseEpisodesOrder(&anime)
